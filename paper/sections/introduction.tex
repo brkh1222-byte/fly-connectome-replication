@@ -1,0 +1,49 @@
+If a nervous system's wiring diagram is enough to predict behaviour, that prediction should
+not depend on which individual's wiring diagram is used. The whole-brain leaky
+integrate-and-fire (LIF) model of Shiu et al.\ \citep{shiu2024} is the strongest test of the
+first half of that statement. It was built directly from the FlyWire connectome of one adult
+female \textit{Drosophila} \citep{dorkenwald2024,schlegel2024}. Every neuron has the same
+parameters, every synapse has the same weight $\Wsyn$, and each neuron's sign comes from its
+predicted transmitter \citep{eckstein2024}. With one tuned parameter, the model nevertheless
+predicted which neurons drive proboscis extension and antennal grooming, and 91\% of 164
+experimentally testable predictions were consistent with experiments \citep{shiu2024}. Such
+connectome-constrained models are now used to generate hypotheses at scale
+\citep{pospisil2024,lappalainen2024}. Yet the wiring alone does not in general determine
+circuit dynamics \citep{bargmann2013,beiran2025}, and every prediction from the Shiu model
+rests on a sample of one animal.
+
+Two further whole-CNS connectomes now make the second half of the statement testable. The
+brain-and-nerve-cord connectome BANC \citep{bates2026} is a second female. The male CNS
+\citep{berg2026} is a male, reconstructed by a different team and pipeline. Most of their
+cell types can be matched to FlyWire \citep{schlegel2024,berg2026}. Connectomes of different
+individuals share a stereotyped core but differ in detail, both in worms \citep{witvliet2021}
+and in flies \citep{schlegel2024,pedigo2023}. Crucially, two connectomes can differ for three
+reasons that look identical in the data: true individual variation, differences in
+reconstruction (imaging, segmentation, synapse detection, proofreading completeness), and sex.
+
+Independent groups have already started porting the Shiu model. An open project ran it
+unchanged on FlyWire, the male CNS (v0.9) and BANC, and found that sugar-receptor stimulation
+drives the proboscis motor neuron MN9 at 76.7, 68.9 and 17.8\,Hz respectively
+\citep{brainlab2026}. A pre-registered benchmark recovered sugar$\to$MN9 in the male CNS v1.0
+after recalibration \citep{fugsukjit2026}. Most directly, Silva Santos \citep{santos2026} (code archive with a draft preprint, not peer reviewed) reimplemented
+the model exactly and compared FlyWire with BANC across six stimulation protocols. Cell-type
+response profiles agreed strongly between repeated simulations (Spearman $\rho=0.98$),
+moderately between the two hemispheres of one fly ($\rho=0.54$), and weakly between the two
+flies ($\rho\le0.32$). BANC as released lost sugar$\to$MN9 and JO$\to$aBN1. That study also
+showed that BANC's edge lists carry about 2.1-fold fewer synapses per neuron on matched types,
+and attributed the gap to synapse detection rather than biology. In a single, much smaller
+circuit, differences between reconstructions of the same animal rival differences between
+animals \citep{yad2026}.
+
+Whether the FlyWire--BANC disagreement reflects individuality or reconstruction has not been
+tested. Nor has a third connectome been placed on the same agreement scale, or the observed
+agreement been compared with a null. Here we address these gaps. We (i) validate a batched
+GPU implementation of the Shiu model against the original Brian2 code; (ii) run Shiu's
+experimentally validated feeding and grooming predictions on FlyWire v783, BANC v888 and the
+male CNS v1.0 under three pre-specified weight normalisations; (iii) place all three
+connectomes, both hemispheres and two kinds of control on one agreement ladder; and (iv) ask
+directly whether removing synapses from FlyWire until each cell type matches BANC's input
+deficit (a ``degraded FlyWire'') reproduces BANC's behaviour. Degree-preserving shuffles of
+each connectome \citep{maslov2002} set the floor of the ladder. A robustness sweep over
+synapse thresholds, normalisations and sign rules, and a stimulation screen over all shared
+sensory types, test how general the conclusions are.

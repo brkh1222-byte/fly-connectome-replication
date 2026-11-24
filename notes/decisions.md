@@ -51,5 +51,48 @@ release), so that our FlyWire baseline is exactly the published model. The Zenod
 `proofread_connections_783.feather` is optional (`get_flywire.py --zenodo`); it is used only
 for a derivation check if it can be downloaded.
 
-## D6. Compute plan: laptop only (no H100)
-(Filled in after benchmarking; see below.)
+## D6. Compute plan (revised 2026-11-24): Mac for main analyses, one rented RTX 4090 for sweeps
+The researcher will rent one RTX 4090 (24 GB). The Mac (Apple M4, 16 GB shared with three
+other agents) runs: data, Brian2 reproduction, validation, matching, the main
+cross-connectome experiments (3 datasets × N0/N1/N2, core battery + replicate seed), and the
+degraded-FlyWire control if time allows. The 4090 runs the full grid in `src/sweep.py`:
+- **P1 (T4.2):** 50 degraded copies per reference × {N0, N1}; 50 shuffles per dataset × {N0, N1}.
+  Fifty copies give a stable 95% range (2.5th-97.5th percentile) for a null distribution;
+  20 would leave the tails resting on one or two values.
+- **P2 (T4.1):** thresholds {1, 3, 5, 10} cover "all synapses" (Shiu) through the common
+  "≥ 5" convention to a strict 10. All three normalisations; three sign schemes; brain plus
+  whole CNS. Each base setting gets a replicate seed (the seed rung). The 10 edge-noise
+  bootstraps per own-sign setting estimate the uncertainty that comes from the connectome
+  itself. Ten replicates are enough to estimate a spread at the scale of agreement
+  differences (about 0.05 in ρ).
+- **P3 (T4.3):** every sensory type shared by the three datasets and present on both sides,
+  stimulated alone at 150 Hz, with 5 shuffle controls per dataset.
+Seeds: within each item, trials are independent seeds (30, as in Shiu). Replicate seeds are
+separate items.
+
+## D7. Pre-specified analysis (fixed before any cross-connectome simulation)
+- Protocol rate is 150 Hz (Shiu's default `r_poi`) for every stimulus. Rate curves are
+  supplementary.
+- Replication criteria: see src/analysis.py docstring (≥ 5 Hz and ≥ 20% of FlyWire, Wilcoxon
+  vs 0; suppression ≥ 50% with Mann-Whitney; JO-CE > JO-F with Mann-Whitney; Holm across
+  non-FlyWire tests).
+- Agreement: per (type, side relative to stimulus) mean rate; Spearman on log1p over groups
+  active ≥ 2 Hz in either profile; Jaccard; top-20/50 overlap. The 2 Hz threshold and the
+  group definition follow cerebro-mosca, so numbers are comparable.
+- Primary setting: brain subgraph, all synapses (threshold 1), N1, own signs.
+- **H3 completeness test:** the FlyWire-BANC ρ is "explained by completeness" if it falls
+  inside the 2.5-97.5% range of the FlyWire-vs-degraded-FlyWire(→BANC) distribution. The
+  test is run under N0 (as-is) and N1.
+
+## D8. Stimulus sets are defined by cell type, identically in every dataset
+Shiu's hand-picked v630 neuron lists do not exist in BANC or the male CNS, and in v783 their
+"sugar" list mixes LB3b/c/d and LB4b. Cross-connectome stimuli therefore use type definitions
+(sugar = LB3b + LB3c, bitter = LB1a-d, water = LB3a, JO-CE = JO-C*/JO-E*, JO-F = JO-F*) on each
+side. The FlyWire reproduction uses Shiu's exact lists.
+
+## D9. Signs: Shiu's file for FlyWire; each dataset's own predictions otherwise
+Shiu's v783 signs disagree with Schlegel's top_nt for about 6,000 neurons. Among them is
+il3LN6, which cerebro-mosca showed causes a right-side sugar runaway; our 100 ms smoke test
+reproduced it. The primary analysis keeps Shiu's signs, since the aim is to replicate the
+published model. The "nt" and "type" sign schemes are run in the sweep, and the hemisphere
+rung is reported under both "own" and "nt" signs.

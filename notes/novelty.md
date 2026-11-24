@@ -6,7 +6,7 @@ form, all on GitHub. Items marked "snippet" were not opened.
 
 ## 1. cerebro-mosca (the closest prior work)
 
-**Citation:** Santos, A. M. S. (2026). *Auditing a whole-brain Drosophila model across
+**Citation:** Silva Santos, A. M. (2026). Zenodo software record "cerebro: exact fast whole-brain Drosophila LIF model, audit and FlyWire vs BANC comparison" (v1.0.0); the draft preprint inside the repo is titled. *Auditing a whole-brain Drosophila model across
 hemispheres and individuals: a single mis-signed neuron, a non-sparse olfactory regime, and
 limited cross-connectome reproducibility.* Preprint draft, Sep 2026, **not peer reviewed**.
 Code and data: github.com/amthedev/cerebro-mosca (MIT), archived at Zenodo

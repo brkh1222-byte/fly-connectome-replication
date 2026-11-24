@@ -153,7 +153,8 @@ def load_run(path):
 
 
 MAIN = [dict(dataset=d, subgraph="brain", threshold=1, norm=nm, sign="own")
-        for nm in ("N0", "N1", "N2") for d in C.DATASETS]
+        for nm in ("N1", "N0", "N2") for d in C.DATASETS] + \
+       [dict(dataset=d, subgraph="brain", threshold=1, norm="N1", sign="nt") for d in C.DATASETS]
 
 
 def main():

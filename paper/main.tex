@@ -1,0 +1,68 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\usepackage{lineno}
+\linenumbers
+\newcommand{\todo}[1]{\textcolor{red}{[#1]}}
+\newcommand{\Wsyn}{W_{\mathrm{syn}}}
+
+\title{Reconstruction or individuality? Testing a whole-brain \textit{Drosophila}
+connectome model across three connectomes with completeness-matched controls}
+\author{[AUTHORS --- TBD]}
+\date{Draft, \today}
+
+\begin{document}
+\maketitle
+
+%% RESULTS-DEPENDENT TEXT IS FILLED FROM paper/notes.md; every number there cites its source file.
+\input{sections/abstract}
+
+\section{Introduction}
+\input{sections/introduction}
+
+\section{Results}
+\input{sections/results}
+
+\section{Discussion}
+\input{sections/discussion}
+
+\section{Methods}
+\input{sections/methods}
+
+\section*{Data and code availability}
+All connectome data are public releases under CC BY 4.0: FlyWire v783
+\citep{dorkenwald2024,schlegel2024} via the Shiu et al.\ model repository and Zenodo
+(doi:10.5281/zenodo.10676866); BANC v888 \citep{bates2026} via Harvard Dataverse
+(doi:10.7910/DVN/7WTH1N); and the male CNS v1.0 \citep{berg2026} via the public Janelia bucket
+\texttt{gs://flyem-male-cns/v1.0}. Code (MIT licence), exact file lists and the commands that
+regenerate every figure and table are at
+\url{https://github.com/brkh1222-byte/fly-connectome-replication}. Data are downloaded by
+scripts and are not redistributed.
+
+\section*{Author contributions}
+[AUTHORS --- TBD] (CRediT roles to be assigned).
+
+\section*{AI use}
+[AI-USE STATEMENT --- TBD]. Draft note for the researcher: Claude (Anthropic) designed and
+ran the analyses under the researcher's direction. It wrote the code and the first draft of
+this manuscript. All citations were checked against Crossref, arXiv, Zenodo or GitHub. The
+researcher reviewed and edited the text and is responsible for the content.
+
+\section*{Competing interests}
+None declared. \todo{confirm}
+
+\section*{Funding}
+\todo{None / to be completed.}
+
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+
+\end{document}

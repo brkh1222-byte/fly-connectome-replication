@@ -1,0 +1,120 @@
+\subsection*{Connectome data}
+\textbf{FlyWire v783.} We used the exact network distributed with the Shiu et al.\ model
+(\texttt{Connectivity\_783.parquet}, \texttt{Completeness\_783.csv}; repository commit
+\texttt{91bdd1e}). It has 138{,}639 neurons and 15{,}091{,}983 directed connections carrying
+54{,}492{,}922 synapses, with no synapse-count threshold. Each presynaptic neuron's sign is as
+given in that file. Cell types, sides and super-classes come from Schlegel et al.\
+\citep{schlegel2024} (Supplemental File~1).
+\textbf{BANC v888.} \todo{fill from standardise.py: file, neuron count, brain subgraph,
+synapse table v2, NT predictions, matching to FlyWire types.}
+\textbf{Male CNS v1.0.} We used the connection table restricted to traced bodies with synapse
+confidence $\ge0.5$
+(\texttt{connectome-weights-male-cns-v1.0-minconf-0.5-traced-only}), the body annotations,
+and the neuron-level transmitter predictions (\texttt{predicted\_nt}). Cell types were
+harmonised to FlyWire names through the \texttt{flywireType} field, falling back to the male
+CNS type. \todo{counts}
+\textbf{Signs.} As in Shiu et al., GABA and glutamate are inhibitory and all other
+transmitters are excitatory. FlyWire used the signs in Shiu's file. BANC and the male CNS used
+their own neuron-level predictions (``own''). Two alternative sign schemes were tested in the
+robustness sweep: the same rule applied to each dataset's neuron-level prediction (``nt'';
+for FlyWire, the Schlegel \texttt{top\_nt}), and the majority sign of each cell type
+(``type'').
+\textbf{Brain subgraph.} The primary analysis used the brain portion of each connectome,
+because FlyWire has no nerve cord. For the male CNS we removed bodies whose super-class is a
+nerve-cord class (\texttt{vnc\_*}, enteric, efferent-ascending) and kept descending and
+ascending neurons. \todo{BANC rule}. Whole-CNS networks were a secondary analysis.
+
+\subsection*{Model}
+We used the Shiu et al.\ model unchanged \citep{shiu2024}. Each neuron $i$ has membrane
+potential $v_i$ and synaptic conductance-like variable $g_i$ (in mV):
+\begin{equation}
+\tau_m \frac{dv_i}{dt} = (v_0 - v_i) + g_i, \qquad \tau_g \frac{dg_i}{dt} = -g_i ,
+\end{equation}
+with $v_0=v_{\mathrm{reset}}=-52$\,mV, threshold $-45$\,mV, $\tau_m=20$\,ms, $\tau_g=5$\,ms,
+refractory period 2.2\,ms and synaptic delay 1.8\,ms \citep{kakaria2017,shiu2024}. A spike of
+neuron $j$ increments $g_i$ by $w_{ji}=\Wsyn\, s_j\, n_{ji}$ after the delay, where $n_{ji}$
+is the synapse count, $s_j=\pm1$ the sign and $\Wsyn=0.275$\,mV. On a spike, $v$ and $g$ are
+reset to $-52$\,mV and 0, and both are frozen while refractory. Stimulated neurons receive
+Poisson input at rate $r$; each input event adds $250\,\Wsyn$ to $v$, and these neurons have
+no refractory period. Silent networks remain silent: there is no background drive. Each
+experiment consisted of 30 trials of 1\,s, as in Shiu et al.
+
+\textbf{Reference implementation.} Shiu's Brian2 \citep{stimberg2019} code was run unchanged
+except that the network was built once and restored before each trial (2.9.0, Cython
+backend, $dt=0.1$\,ms, exact linear integration). We measured two Brian2 behaviours that
+any reimplementation must reproduce. First, synaptic input arriving at a refractory neuron is
+discarded rather than delayed (also reported in \citep{santos2026}). Second, within one time
+step the order is state update, threshold, synaptic delivery, reset.
+
+\textbf{Batched implementation.} We reimplemented the model in PyTorch \citep{paszke2019}.
+Many trials and experiments run as rows of a state matrix. Integration is exact over each
+0.1\,ms step. Synaptic delivery is event-driven: at each step the outgoing synapses of the
+neurons that spiked 18 steps earlier are gathered from a compressed sparse-row matrix and
+scattered into $g$, with input to refractory targets discarded. All arithmetic is in float32,
+so it runs on consumer GPUs with weak double precision.
+
+\textbf{Validation.} Before any cross-connectome run, we compared the PyTorch model (float32;
+Apple-silicon GPU and CPU) with Brian2 (float64) on FlyWire v783 in three experiments: sugar
+GRNs at 100\,Hz, sugar plus bitter GRNs at 100\,Hz each, and JO-CE neurons at 100\,Hz. Each
+used 30 trials and independent seeds. The pre-specified pass criteria were: the per-neuron
+mean-rate correlation with Brian2 is no more than 0.01 below the Brian2-vs-Brian2 seed
+ceiling; the readout neuron's 95\% confidence intervals overlap; and total spike counts per
+trial do not differ (Mann--Whitney $p>0.01$).
+
+\subsection*{Stimuli and readouts}
+Stimuli were defined by cell type, identically in all datasets: sugar GRNs (LB3b, LB3c),
+bitter GRNs (LB1a--d), water GRNs (LB3a), Johnston's-organ neurons JO-C/E (all JO-C* and
+JO-E* types) and JO-F (JO-F*). All neurons of the type(s) on one side were stimulated at
+150\,Hz, Shiu's default rate. Each protocol was run on each side. Readouts were MN9 (FlyWire
+type CB0701; male CNS type MN9) and aBN1 (SAD093), averaged over both sides. For the
+reproduction on FlyWire we also used Shiu's exact neuron lists, whose v783 composition is
+LB3c (9), LB3d (5), LB4b (4) and LB3b (2) for ``sugar''.
+
+\subsection*{Weight normalisation}
+Connectomes differ in synapse detection density, while $\Wsyn$ was set on FlyWire. We
+pre-specified three normalisations, none tuned on any readout. N0: raw counts, as in Shiu et
+al. N1: one global factor per dataset, $s_d = \tilde{m}_{\mathrm{FlyWire}}/\tilde{m}_d$,
+where $\tilde{m}$ is the median total input synapse count over neurons of the cell types
+present in all three datasets, excluding readout types. N2: input fraction, $n_{ji}$ divided
+by neuron $i$'s total input and multiplied by $\tilde{m}_{\mathrm{FlyWire}}$. N1 was
+designated primary.
+
+\subsection*{Agreement metrics and ladder}
+For each experiment we computed the mean rate of every (cell type, side relative to the
+stimulus) group. Silent neurons count as zero, and the stimulated types are excluded. Two
+profiles were compared over the groups present in both networks with Spearman's $\rho$ on
+$\log(1+\mathrm{rate})$, restricted to groups active ($\ge2$\,Hz) in either profile. We also
+report the Jaccard index of the active sets and the overlap of the top 20 and top 50 groups.
+These choices follow \citep{santos2026}, so the numbers are directly comparable. 95\%
+confidence intervals come from 1{,}000 bootstrap resamples over groups. The ladder rungs were:
+\emph{seed} (the same network, two independent sets of 30 trials); \emph{hemisphere} (left vs
+mirrored right stimulation in one network); \emph{between} (FlyWire--BANC, FlyWire--male CNS,
+BANC--male CNS, same side); \emph{degraded} (FlyWire vs degraded FlyWire); and \emph{shuffle}
+(each network vs its degree-preserving shuffles).
+
+\subsection*{Controls}
+\textbf{Degraded FlyWire.} For each cell type shared with a reference connectome (BANC or the
+male CNS), let $p_t=\min(1,\tilde{m}^{\mathrm{ref}}_t/\tilde{m}^{\mathrm{FW}}_t)$, where
+$\tilde{m}_t$ is the median total input synapse count of type $t$. Each connection onto a
+neuron of type $t$ was thinned binomially, $n'\sim\mathrm{Bin}(n,p_t)$. Types absent from the
+reference used the median ratio. This keeps FlyWire's partners, signs and individuality while
+imposing the reference's per-type completeness deficit.
+\textbf{Degree-preserving shuffle.} The postsynaptic partners of all connections were permuted
+\citep{maslov2002}. This preserves every neuron's in- and out-degree and out-strength.
+Duplicate pairs were merged and self-connections removed.
+\textbf{Edge noise.} Synapse counts were resampled as $n'\sim\mathrm{Poisson}(n)$.
+
+\subsection*{Replication criteria and statistics}
+An activation prediction (sugar$\to$MN9, water$\to$MN9, JO-C/E$\to$aBN1) replicated in a
+connectome if the mean readout rate was $\ge5$\,Hz and $\ge20\%$ of FlyWire's under the same
+normalisation, and greater than zero by a one-sided Wilcoxon signed-rank test. Bitter
+suppression replicated if MN9 during sugar plus bitter stimulation was lower than during sugar
+alone (one-sided Mann--Whitney) and the suppression was at least 50\%. JO specificity
+replicated if aBN1 responded more to JO-C/E than to JO-F (one-sided Mann--Whitney).
+$p$-values across the non-FlyWire tests were Holm-corrected \citep{holm1979}.
+Simulation trials are the unit of replication. Confidence intervals therefore describe
+simulation noise and cell-type sampling, not variation across flies: each connectome is one
+animal.
+
+\subsection*{Robustness sweep and stimulation screen}
+\todo{grid as run; see src/sweep.py and notes/decisions.md D6.}
