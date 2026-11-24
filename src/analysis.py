@@ -119,6 +119,11 @@ def ladder(norm="N1", sign="own", threshold=1, subgraph="brain", n_copies=50, n_
     V = {d: dict(base, dataset=d) for d in C.DATASETS}
     R = {d: get(V[d]) for d in C.DATASETS}
     Rr = {d: get(V[d], "core_rep") for d in C.DATASETS}
+    Rb = {d: get(V[d], "core_bal") for d in C.DATASETS}
+    for p in PROTOCOLS:
+        for d in C.DATASETS:  # D10: hemisphere rung with side-balanced stimulus counts
+            add("hemisphere_balanced", f"{d}L|{d}R", V[d], Rb[d], f"{p}_L_150", V[d], Rb[d],
+                f"{p}_R_150", p, "L/R")
     for p in PROTOCOLS:
         for s in ("L", "R"):
             e = f"{p}_{s}_150"

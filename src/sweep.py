@@ -43,6 +43,9 @@ def items(phase):
             for nm in ("N0", "N1"):
                 for s in range(N_SHUFFLE):
                     out.append((dict(dataset=d, norm=nm, perturb=dict(kind="shuffle", seed=s)), "core"))
+        for d in DS:  # D10: side-balanced stimulation for the hemisphere rung
+            for nm in ("N0", "N1"):
+                out.append((dict(dataset=d, norm=nm), "core_bal"))
     elif phase == "P2":
         for d in DS:
             subs = ("brain",) if d == "flywire" else ("brain", "cns")
@@ -74,14 +77,14 @@ def main():
     for ph in phases:
         its = items(ph)
         if a.list:
-            n_exp = {"core": 12, "core_rep": 12, "screen": 2 * len(X.screen_types())}
+            n_exp = {"core": 12, "core_rep": 12, "core_bal": 10, "screen": 2 * len(X.screen_types())}
             ts = sum(n_exp[b] * 30 for _, b in its)
             print(f"{ph}: {len(its)} items, {ts} trial-seconds")
             continue
         if a.tiny:
             its = its[:1] + its[-1:]
         t0 = time.time()
-        n_exp = {"core": 12, "core_rep": 12, "screen": 2 * len(X.screen_types())}
+        n_exp = {"core": 12, "core_rep": 12, "core_bal": 10, "screen": 2 * len(X.screen_types())}
         total_ts = sum(n_exp[b] * 30 for _, b in its)
         done_ts, run_ts, run_s = 0, 0, 0.0
         for k, (v, bat) in enumerate(its):

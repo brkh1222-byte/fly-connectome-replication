@@ -47,6 +47,16 @@ def battery(neurons, name):
                 ex.append((f"{p}_{s}_150", [(S.stim_idx(neurons, p, s), 150.0)]))
             ex.append((f"sugar+bitter_{s}_150", [(S.stim_idx(neurons, "sugar", s), 150.0),
                                                  (S.stim_idx(neurons, "bitter", s), 150.0)]))
+    elif name == "core_bal":
+        # D10: both sides stimulated with the same number of neurons (the larger side is
+        # randomly subsampled, fixed seed) so side imbalance in typing cannot drive L/R gaps
+        rng = np.random.default_rng(20261125)
+        for p in ("sugar", "bitter", "water", "JO_CE", "JO_F"):
+            idx = {s: S.stim_idx(neurons, p, s) for s in SIDES}
+            k = min(len(idx["L"]), len(idx["R"]))
+            for s in SIDES:
+                sub = np.sort(rng.choice(idx[s], k, replace=False)) if k else idx[s][:0]
+                ex.append((f"{p}_{s}_150", [(sub, 150.0)]))
     elif name == "rates":
         s = "L"
         for p in ("sugar", "water", "JO_CE", "JO_F"):
@@ -120,6 +130,8 @@ def run_variant(variant, bat, device="cpu", n_trials=30, seed=0, max_rows=600, t
         cnt = net.run_batch([st for _, st in chunk], n_trials, seed=seed_base + c0,
                             t_run=t_run).numpy()
         rate = cnt / (t_run / 1000.0)
+        print(f"  {key} {bat}: {min(c0 + per, len(exps))}/{len(exps)} exps, "
+              f"{time.time() - t0:.0f}s", flush=True)
         for j, (k, _) in enumerate(chunk):
             m = rate[j].mean(0)
             nz = np.flatnonzero(m > 0)
