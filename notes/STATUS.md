@@ -1,41 +1,40 @@
-# STATUS (checkpoint 2026-11-24 ~16:05, before Mac shutdown)
+# STATUS (checkpoint 2026-11-25 00:45)
 
 ## Done
-- Novelty check: heavy partial overlap (cerebro-mosca Zenodo 10.5281/zenodo.23005090; brainlab), NOT a scoop.
-  See notes/novelty.md, decision D1 in notes/decisions.md (continue; headline = male CNS rung + nulls +
-  degraded-FlyWire completeness control + pre-specified sweep).
-- uv env `.venv` (py3.11; brian2 2.9.0, numpy 2.2.6 pinned, torch 2.15.0). requirements.lock committed.
-- Licence MIT (notes/licence.md). Authorship rule updated in CLAUDE.md/TASKS.md.
-- Brian2 semantics measured (notes/brian2_semantics.md): input during refractory is DISCARDED.
-- src/shiu_brian2.py (reference; ~4.3 s/trial cython, 2.2 GB RAM). Sugar 100 Hz v783: MN9 ~62 Hz.
-- src/lif_torch.py event-driven float32 LIF. Benchmark (old single-exp version, 30 trials, sugar):
-  CPU 199 s, MPS 97 s (identical counts CPU vs MPS with same CPU RNG).
-- Just refactored lif_torch.py to `run_batch` (many experiments per batch, device RNG). UNTESTED.
+- Novelty: heavy partial overlap with cerebro-mosca (FlyWire vs BANC). Precise comparison and
+  framing in notes/novelty.md; decisions D1-revised and D6-D9 in notes/decisions.md.
+- Env, licence (MIT), download scripts, data access notes (notes/data_access.md).
+- **All data downloaded and checksum-verified** (data/raw, git-ignored):
+  - FlyWire: Shiu repo files + Schlegel annotations.
+  - Male CNS v1.0: traced-only weights, annotations, NT.
+  - BANC v888: meta + NT (Dataverse, MD5 OK); edgelist_simple_v2 (GCS mirror, MD5 = Dataverse).
+- Standardised: flywire (138,639 neurons / 15.09 M edges / 54.5 M synapses); malecns (165,122 /
+  25.56 M / 124.0 M; brain 144,717). Male CNS types harmonised to FlyWire names (95% of brain
+  neurons). BANC: TODO (standardise.py banc() not written yet).
+- **Validation (results/gpu_validation.md): PyTorch float32 vs Brian2 float64 passes on MPS 3/3;
+  CPU 1/1 run** (other CPU runs were stopped because of machine overload). Fig:
+  paper/figures/fig2_validation.*
+- Brian2 reproduction (src/repro_shiu.py): partially run (results/brian2/, about 6/37 runs).
+  It resumes from finished files.
+- Pipeline code: connectome.py (N0/N1/N2, thresholds, signs, shuffle/degrade/edgenoise),
+  stimuli.py, experiments.py (ledger), agreement.py, analysis.py, summary.py, match_types.py,
+  sweep.py (full grid), figures.py.
+- Cloud runbook draft: docs/cloud_runbook.md, scripts/cloud_bootstrap.sh, scripts/run_sweeps.sh
+  (not yet self-tested).
+- Paper: paper/main.tex with intro + methods drafted; references.bib (27 entries, verified).
 
-## In progress (killed at shutdown; all resumable)
-- src/validate.py --devices mps,cpu (Brian2 vs Torch, 3 exps x 30 trials). Brian2 outputs cached in
-  results/validation/ (if present they are reused). Torch .npy there came from the OLD lif_torch:
-  DELETE results/validation/torch-* before re-running so the new code is validated.
-- Downloads (resumable via .part files; scripts skip finished files):
-    nice .venv/bin/python src/get_banc.py        # BANC v888 (Dataverse, slow ~80 KB/s)
-    nice .venv/bin/python src/get_male_cns.py    # male CNS v1.0 traced-only weights + NT
-  FlyWire annotations are done. Zenodo FlyWire file is optional (`src/get_flywire.py --zenodo`).
-  NOTE: _download.fetch resumes .part with a Range header.
-
-## Key findings so far
-- Shiu "right" sets = FlyWire side 'left'. Shiu sugarR = LB3c(9)+LB3d(5)+LB4b(4)+LB3b(2); waterR = LB3a(11)+LB3c(7);
-  bitterR = LB1a-d; JO_CE = JO-C*/JO-E*; JO_F = JO-F*. MN9 = FlyWire type CB0701 (male CNS type MN9,
-  flywireType CB0701); aBN1 = SAD093 in both.
-- Male CNS annotations use FlyWire names (flywireType); LB*/JO-* types present.
-- Shiu v783 graph: 138,639 neurons, 15.09M edges, 54.5M synapses, unthresholded; signs mostly top_nt rule
-  (ACh/DA/OA/5HT +, GABA/Glu -) with ~6k disagreements -> FlyWire uses Shiu signs; others own NT rule.
+## Compute reality on this Mac
+Shared with other agents (load average 12-31 on 10 cores; another job also uses MPS).
+Benchmark (FlyWire core battery, 50 ms runs, under load):
+- MPS: 60 rows → 21 ms/step = 3.5 s per trial-second; 360 rows → 204 ms/step = 5.7 s per trial-second.
+- CPU: 60 rows → 50 ms/step = 8.3 s per trial-second.
+So MPS works best with small batches (`--max_rows 60`). One core battery
+(12 exps × 30 trials × 1 s) takes about 21 min per variant on MPS under load.
 
 ## Next steps
-1. Test run_batch (quick 2-trial sanity vs old numbers: sugar 100 Hz MN9 ~60 Hz, ~350 active), then
-   `rm results/validation/torch-*; caffeinate -i nice .venv/bin/python src/validate.py --devices mps,cpu`.
-2. Finish downloads; write src/standardise.py (neurons/edges parquet, brain-only + CNS), match_types.py
-   (type-based stimulus sets: sugar=LB3b+LB3c, bitter=LB1a-d, water=LB3a, JO-CE, JO-F; readouts MN9/CB0701, SAD093).
-3. experiments.py / agreement.py / nulls.py / degrade.py; main runs on Mac (MPS).
-4. Cloud runbook for RTX 4090 (float32): docs/cloud_runbook.md, scripts/cloud_bootstrap.sh, scripts/run_sweeps.sh;
-   test locally on tiny grid; estimate 4090 hours and cost. Do NOT rent anything.
-5. Figures, paper/main.tex, paper/notes.md.
+1. `python src/standardise.py banc` (write banc()); then summary.py and match_types.py.
+2. Main runs on MPS, max_rows 60, in priority order:
+   `src/experiments.py --variants main --battery core --device mps --max_rows 60`, then core_rep.
+3. analysis.py → replication table + ladder; degraded/shuffle (a few copies on the Mac; full set on the 4090).
+4. Runbook self-test: `DEVICE=cpu TINY=1 VOL=<scratch> FLY_DATA=$PWD/data bash scripts/run_sweeps.sh --foreground`.
+5. Estimate 4090 hours and cost; figures; fill paper results; paper/notes.md.
