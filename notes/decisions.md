@@ -19,6 +19,13 @@ are compared with ours.
 transferable calibration method. Both stay available as follow-ups. (a) is partly included
 as T4.3.
 
+## D1-revised. Framing: "explaining the cross-connectome gap" (2026-11-24, after reading cerebro-mosca in full)
+cerebro-mosca's draft covers FlyWire-vs-BANC very thoroughly: six protocols, a hemisphere
+ladder, calibrations, and an NT audit. Our primary contribution is therefore (a) the
+degraded-FlyWire completeness control, (b) the three-connectome triangle that adds the male
+CNS v1.0, and (c) shuffle floors and CIs. The FlyWire-BANC battery is presented as an
+independent replication of cerebro-mosca. Full comparison and ranked options: notes/novelty.md §3–4.
+
 ## D2. Simulator semantics follow Brian2 as measured, including its quirks
 Brian2 discards synaptic input that arrives during a neuron's refractory period
 (notes/brian2_semantics.md). This is arguably a quirk of how `(unless refractory)` interacts
