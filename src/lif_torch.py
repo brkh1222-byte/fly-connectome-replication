@@ -194,7 +194,10 @@ def load_shiu(version="783", root=None):
     """Load Shiu's own model input files (completeness + connectivity) as arrays."""
     import pandas as pd
     from pathlib import Path
-    root = Path(root or Path(__file__).resolve().parents[1] / "data" / "external" / "shiu_repo")
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from paths import SHIU
+    root = Path(root or SHIU)
     files = {"630": ("2023_03_23_completeness_630_final.csv", "2023_03_23_connectivity_630_final.parquet"),
              "783": ("Completeness_783.csv", "Connectivity_783.parquet")}[version]
     comp = pd.read_csv(root / files[0], index_col=0)

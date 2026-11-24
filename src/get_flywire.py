@@ -11,7 +11,8 @@ Sources (all CC BY 4.0 unless noted):
 Usage: python src/get_flywire.py
 """
 import subprocess
-from _download import RAW, ROOT, fetch
+from _download import RAW, fetch
+from paths import SHIU
 
 ZENODO = "https://zenodo.org/api/records/10676866/files/{}/content"
 FILES = {"proofread_connections_783.feather": 852_000_000, "proofread_root_ids_783.npy": None}
@@ -27,7 +28,8 @@ if __name__ == "__main__":
         for f in FILES:
             fetch(ZENODO.format(f), out / f)
     fetch(ANNOT, out / "Supplemental_file1_neuron_annotations.tsv")
-    repo = ROOT / "data" / "external" / "shiu_repo"
+    repo = SHIU
+    repo.parent.mkdir(parents=True, exist_ok=True)
     if not repo.exists():
         subprocess.run(["git", "clone", SHIU, str(repo)], check=True)
     subprocess.run(["git", "-C", str(repo), "checkout", "-q", SHIU_COMMIT], check=True)

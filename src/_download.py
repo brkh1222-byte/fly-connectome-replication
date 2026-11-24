@@ -3,8 +3,7 @@ import hashlib, os, sys, time
 from pathlib import Path
 import requests
 
-ROOT = Path(__file__).resolve().parents[1]
-RAW = ROOT / "data" / "raw"
+from paths import ROOT, RAW  # noqa: F401
 
 
 def fetch(url, dest, expected_size=None, chunk=1 << 22):

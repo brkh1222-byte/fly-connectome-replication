@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from experiments_def import SHIU_SETS  # noqa: E402
 
-SHIU_DIR = ROOT / "data" / "external" / "shiu_repo"
+from paths import SHIU as SHIU_DIR  # noqa: E402
 PATHS = {
     "630": (SHIU_DIR / "2023_03_23_completeness_630_final.csv",
             SHIU_DIR / "2023_03_23_connectivity_630_final.parquet"),

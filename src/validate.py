@@ -112,8 +112,9 @@ def main():
                              p_total_spikes=p_tot, torch_seconds_30trials=sec, PASS=bool(ok)))
             print(rows[-1], flush=True)
     df = pd.DataFrame(rows)
-    df.to_csv(ROOT / "results" / "gpu_validation.csv", index=False)
-    with open(ROOT / "results" / "gpu_validation.md", "w") as f:
+    tag = "_".join(a.devices.split(","))
+    df.to_csv(ROOT / "results" / f"gpu_validation_{tag}.csv", index=False)
+    with open(ROOT / "results" / f"gpu_validation_{tag}.md", "w") as f:
         f.write("# PyTorch LIF vs Brian2 validation (T2.2)\n\n")
         f.write("FlyWire v783, Shiu parameters, 30 trials x 1 s per run. Brian2 2.9.0 (cython) "
                 "seeds 11/12; Torch seeds 21/22. Criteria are in src/validate.py.\n\n")
