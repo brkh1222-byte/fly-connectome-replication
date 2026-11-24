@@ -44,6 +44,34 @@ class LIFParams:
     t_run: float = 1000.0   # ms
 
 
+def _update_eager(v, g, since, rfc, a_g, a_v, k_vg, v_0, v_th):
+    """Elementwise part of one step (fusable). Returns new v, g, since, not_ref, spk."""
+    since = torch.clamp(since + 1, max=30000)
+    not_ref = since >= rfc
+    v = torch.where(not_ref, v_0 + (v - v_0) * a_v + k_vg * g, v)
+    g = torch.where(not_ref, g * a_g, g)
+    spk = (v > v_th) & not_ref
+    return v, g, since, not_ref, spk
+
+
+_COMPILED = None
+
+
+def _get_update(use_compile):
+    """torch.compile fuses the elementwise chain into one kernel (Triton on CUDA). Falls back
+    to eager mode if compilation is unavailable."""
+    global _COMPILED
+    if not use_compile:
+        return _update_eager
+    if _COMPILED is None:
+        try:
+            _COMPILED = torch.compile(_update_eager, dynamic=False, fullgraph=True)
+        except Exception as e:  # pragma: no cover
+            print(f"[lif_torch] torch.compile unavailable ({e}); using eager", flush=True)
+            _COMPILED = _update_eager
+    return _COMPILED
+
+
 class Network:
     """Holds the CSR connectivity on a device.
 
@@ -52,8 +80,13 @@ class Network:
     """
 
     def __init__(self, n, pre, post, weight, params: LIFParams | None = None,
-                 device="cpu", dtype=torch.float32):
+                 device="cpu", dtype=torch.float32, compile=None):
+        import os
         self.n = int(n)
+        if compile is None:  # default: on for CUDA, off elsewhere; env FLY_COMPILE overrides
+            env = os.environ.get("FLY_COMPILE")
+            compile = (env == "1") if env is not None else str(device).startswith("cuda")
+        self.compile = bool(compile)
         self.p = params or LIFParams()
         self.device = torch.device(device)
         self.dtype = dtype
@@ -159,15 +192,11 @@ class Network:
         counts = torch.zeros((B, N), dtype=torch.int32, device=dev)
         queue = [None] * d  # ring buffer of (sb, sj) spikes waiting to be delivered
 
+        step = _get_update(self.compile)
+        consts = (a_g, a_v, k_vg, p.v_0, p.v_th)
         for t in range(T):
-            # 1) state update (groups slot) for non-refractory neurons
-            since.add_(1).clamp_(max=30000)
-            not_ref = since >= rfc
-            v_new = (v - p.v_0).mul_(a_v).add_(g, alpha=k_vg).add_(p.v_0)
-            v = torch.where(not_ref, v_new, v)
-            g = torch.where(not_ref, g * a_g, g)
-            # 2) threshold
-            spk = (v > p.v_th) & not_ref
+            # 1) state update (groups slot) for non-refractory neurons + 2) threshold
+            v, g, since, not_ref, spk = step(v, g, since, rfc, *consts)
             sb, sj = torch.nonzero(spk, as_tuple=True)
             has = sj.numel() > 0
             if has:

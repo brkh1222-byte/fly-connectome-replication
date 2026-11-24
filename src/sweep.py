@@ -81,11 +81,22 @@ def main():
         if a.tiny:
             its = its[:1] + its[-1:]
         t0 = time.time()
+        n_exp = {"core": 12, "core_rep": 12, "screen": 2 * len(X.screen_types())}
+        total_ts = sum(n_exp[b] * 30 for _, b in its)
+        done_ts, run_ts, run_s = 0, 0, 0.0
         for k, (v, bat) in enumerate(its):
-            X.run_variant(v, bat, a.device, n_trials=2 if a.tiny else 30,
-                          max_rows=a.max_rows or None, t_run=50.0 if a.tiny else 1000.0)
-            if k % 10 == 0:
-                print(f"[{ph}] {k + 1}/{len(its)} items, {time.time() - t0:.0f}s elapsed", flush=True)
+            t1 = time.time()
+            out = X.run_variant(v, bat, a.device, n_trials=2 if a.tiny else 30,
+                                max_rows=a.max_rows or None, t_run=50.0 if a.tiny else 1000.0)
+            dt = time.time() - t1
+            done_ts += n_exp[bat] * 30
+            if dt > 5:  # actually simulated (not skipped)
+                run_ts += n_exp[bat] * 30
+                run_s += dt
+            rate = run_s / run_ts if run_ts else float("nan")  # wall s per trial-second
+            eta_h = rate * (total_ts - done_ts) / 3600
+            print(f"[{ph}] {k + 1}/{len(its)} items | {rate:.3f} s per trial-second | "
+                  f"phase ETA {eta_h:.1f} h | elapsed {(time.time() - t0) / 3600:.2f} h", flush=True)
 
 
 if __name__ == "__main__":

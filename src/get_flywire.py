@@ -18,7 +18,7 @@ ZENODO = "https://zenodo.org/api/records/10676866/files/{}/content"
 FILES = {"proofread_connections_783.feather": 852_000_000, "proofread_root_ids_783.npy": None}
 ANNOT = ("https://raw.githubusercontent.com/flyconnectome/flywire_annotations/main/"
          "supplemental_files/Supplemental_file1_neuron_annotations.tsv")
-SHIU = "https://github.com/philshiu/Drosophila_brain_model.git"
+SHIU_URL = "https://github.com/philshiu/Drosophila_brain_model.git"
 SHIU_COMMIT = "91bdd1e7dcf193f3e7ca5a8933497fcef63b7960"
 
 if __name__ == "__main__":
@@ -31,6 +31,6 @@ if __name__ == "__main__":
     repo = SHIU
     repo.parent.mkdir(parents=True, exist_ok=True)
     if not repo.exists():
-        subprocess.run(["git", "clone", SHIU, str(repo)], check=True)
+        subprocess.run(["git", "clone", SHIU_URL, str(repo)], check=True)
     subprocess.run(["git", "-C", str(repo), "checkout", "-q", SHIU_COMMIT], check=True)
     print("done")
