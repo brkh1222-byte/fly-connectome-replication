@@ -134,8 +134,51 @@ def malecns():
 
 
 # ----------------------------------------------------------------------------------------
+ALIASES = {"MN9": "CB0701"}  # MN9 is FlyWire type CB0701 (male CNS flywireType of MN9)
+
+
 def banc():
-    raise NotImplementedError("filled in after inspecting the BANC release files")
+    """BANC v888: proofread neurons only (cf. FlyWire proofread, male CNS Traced); glia and
+    non-neurons dropped. Type = reviewed/automatic FlyWire match ('fafb_cell_type', 'auto:'
+    prefix stripped) if it is a FlyWire type, else BANC 'cell_type' if it is one, else unmatched.
+    Region: central_brain + optic_lobe = brain; ventral_nerve_cord = vnc; missing = unknown.
+    Signs from the neuron-level 'neurotransmitter_predicted' (NOT the per-type consensus column,
+    which cerebro-mosca found inconsistent for 68 types). Edges: synapse table v2."""
+    d = RAW / "banc_888"
+    m = pd.read_feather(d / "banc_888_meta.feather",
+                        columns=["banc_888_id", "proofread", "side", "region", "super_class",
+                                 "cell_class", "cell_type", "fafb_cell_type",
+                                 "neurotransmitter_predicted"])
+    m = m[(m.proofread.astype(str).str.upper() == "TRUE") &
+          ~m.super_class.isin(["glia", "not_a_neuron"])].drop_duplicates("banc_888_id")
+    fwt = flywire_types()
+    fafb = m.fafb_cell_type.astype("string").str.replace("auto:", "", regex=False)
+    own = m.cell_type.astype("string").replace(ALIASES)
+    fafb = fafb.replace(ALIASES)
+    typ = fafb.where(fafb.isin(fwt), own.where(own.isin(fwt), own))
+    n = pd.DataFrame({"id": m.banc_888_id.astype(np.int64).values})
+    n["type"] = typ.astype(object).where(typ.notna(), None).values
+    n["type_banc"] = m.cell_type.values
+    n["side"] = side_norm(m.side.values)
+    n["superclass"] = m.super_class.values
+    n["cell_class"] = m.cell_class.values
+    reg = m.region.astype(str).values
+    n["region"] = np.where(np.isin(reg, ["central_brain", "optic_lobe"]), "brain",
+                           np.where(reg == "ventral_nerve_cord", "vnc", "unknown"))
+    n["nt"] = m.neurotransmitter_predicted.values
+    n["sign_nt"] = nt_sign(n.nt)
+    n["sign"] = n.sign_nt.values
+    import pyarrow.feather as pf
+    e = pf.read_table(d / "banc_888_edgelist_simple_v2.feather",
+                      columns=["pre", "post", "count"]).to_pandas()
+    id2i = pd.Series(np.arange(len(n)), index=n.id.values)
+    pre = pd.to_numeric(e["pre"]).values.astype(np.int64)
+    post = pd.to_numeric(e["post"]).values.astype(np.int64)
+    keep = np.isin(pre, n.id.values) & np.isin(post, n.id.values)
+    e2 = pd.DataFrame({"pre": id2i.loc[pre[keep]].values, "post": id2i.loc[post[keep]].values,
+                       "n_syn": e["count"].values[keep]})
+    e2 = e2.groupby(["pre", "post"], as_index=False).n_syn.sum()
+    save("banc", n, e2)
 
 
 if __name__ == "__main__":
