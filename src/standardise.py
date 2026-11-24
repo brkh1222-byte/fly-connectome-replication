@@ -77,6 +77,21 @@ def flywire():
     save("flywire", n, e)
 
 
+def flywire_types():
+    f = STD / "flywire" / "neurons.parquet"
+    if not f.exists():
+        flywire()
+    return set(pd.read_parquet(f, columns=["type"]).type.dropna())
+
+
+def harmonise(own, fw_match):
+    fwt = flywire_types()
+    own = pd.Series(own).astype("string").reset_index(drop=True)
+    fm = pd.Series(fw_match).astype("string").reset_index(drop=True)
+    out = own.where(own.isin(fwt), fm.where(fm.isin(fwt), own))
+    return out.astype(object).where(out.notna(), None).values
+
+
 # ----------------------------------------------------------------------------------------
 MCNS_VNC = ("vnc_", "ENS", "efferent_ascending")
 
@@ -90,16 +105,16 @@ def malecns():
     nt = pd.read_feather(d / "body-neurotransmitters-male-cns-v1.0.feather",
                          columns=["body", "predicted_nt", "consensus_nt"]).drop_duplicates("body")
     ann = ann.merge(nt, left_on="bodyId", right_on="body", how="left")
-    w = pd.read_feather(d / "connectome-weights-male-cns-v1.0-minconf-0.5-traced-only.feather")
-    cols = list(w.columns)
-    pre_c = [c for c in cols if "pre" in c.lower()][0]
-    post_c = [c for c in cols if "post" in c.lower()][0]
-    w_c = [c for c in cols if c not in (pre_c, post_c)][0]
+    pre_c, post_c, w_c = "body_pre", "body_post", "weight"
+    w = pd.read_feather(d / "connectome-weights-male-cns-v1.0-minconf-0.5-traced-only.feather",
+                        columns=[pre_c, post_c, w_c])
     keep = set(ann.bodyId.values)
     w = w[w[pre_c].isin(keep) & w[post_c].isin(keep)]
     n = pd.DataFrame({"id": ann.bodyId.values.astype(np.int64)})
-    # FlyWire-harmonised type: the male CNS 'flywireType' if given, else its own type name
-    n["type"] = ann.flywireType.fillna(ann.type).values
+    # FlyWire-harmonised type: the male CNS type if it is a FlyWire type name (male CNS types
+    # are often finer than its 'flywireType', e.g. LB3a/b/c vs 'LB3'); else 'flywireType' if
+    # that is a single FlyWire type; else the male CNS type (counts as unmatched).
+    n["type"] = harmonise(ann.type, ann.flywireType)
     n["type_mcns"] = ann.type.values
     side = ann.somaSide.where(ann.somaSide.isin(["L", "R", "M"]), ann.rootSide)
     n["side"] = side_norm(side.values)

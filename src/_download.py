@@ -38,3 +38,58 @@ def md5(path, chunk=1 << 22):
         for b in iter(lambda: f.read(chunk), b""):
             h.update(b)
     return h.hexdigest()
+
+
+def fetch_parallel(url, dest, n_conn=8, chunk=8 << 20, retries=20):
+    """Multi-connection ranged download with per-chunk resume (sidecar .chunks file).
+    Each request re-resolves `url` (fresh signed redirect), so long downloads survive URL expiry."""
+    import json, threading
+    dest = Path(dest)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    if dest.exists():
+        print(f"[skip] {dest.name}")
+        return dest
+    r = requests.get(url, headers={"Range": "bytes=0-0"}, stream=True, timeout=120)
+    size = int(r.headers["Content-Range"].split("/")[-1])
+    r.close()
+    part = dest.with_suffix(dest.suffix + ".ppart")
+    side = dest.with_suffix(dest.suffix + ".chunks")
+    done = set(json.load(open(side))) if side.exists() else set()
+    if not part.exists():
+        with open(part, "wb") as f:
+            f.truncate(size)
+    todo = [i for i in range((size + chunk - 1) // chunk) if i not in done]
+    lock = threading.Lock()
+    t0 = time.time()
+
+    def worker():
+        while True:
+            with lock:
+                if not todo:
+                    return
+                i = todo.pop(0)
+            a, b = i * chunk, min(size, (i + 1) * chunk) - 1
+            for _ in range(retries):
+                try:
+                    rr = requests.get(url, headers={"Range": f"bytes={a}-{b}"}, timeout=120)
+                    if rr.status_code == 206 and len(rr.content) == b - a + 1:
+                        with lock:
+                            with open(part, "r+b") as f:
+                                f.seek(a)
+                                f.write(rr.content)
+                            done.add(i)
+                            json.dump(sorted(done), open(side, "w"))
+                        break
+                except requests.RequestException:
+                    pass
+                time.sleep(3)
+            else:
+                raise RuntimeError(f"chunk {i} failed")
+
+    th = [threading.Thread(target=worker) for _ in range(n_conn)]
+    [t.start() for t in th]
+    [t.join() for t in th]
+    part.rename(dest)
+    side.unlink(missing_ok=True)
+    print(f"[ok] {dest.name} {size/1e6:.1f} MB in {time.time()-t0:.0f}s ({n_conn} connections)")
+    return dest
