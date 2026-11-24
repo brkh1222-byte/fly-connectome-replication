@@ -12,3 +12,8 @@ venv/
 *.nwb
 *.npy
 *.avro
+
+# run outputs (large)
+results/validation/*.npy
+results/runs/
+*.part

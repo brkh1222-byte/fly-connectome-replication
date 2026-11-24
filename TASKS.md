@@ -33,4 +33,4 @@ Work top to bottom. Tick boxes as tasks complete. Read PROPOSAL.md and CLAUDE.md
 - [ ] **T4.4** Make the figures.
 
 ## Phase 5: Write-up
-- [ ] **T5.1** Write `paper/notes.md` with bullet results. **The student writes the paper text personally.**
+- [ ] **T5.1** Write `paper/notes.md` with bullet results. Claude drafts the full paper (`paper/main.tex`); the researcher reviews and edits it; the paper carries an AI-use disclosure (`[AUTHORS — TBD]`, `[AI-USE STATEMENT — TBD]`).

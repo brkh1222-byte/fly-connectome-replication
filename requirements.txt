@@ -1,0 +1,16 @@
+# Direct dependencies (exact versions pinned in requirements.lock).
+# Setup: ~/.local/bin/uv venv --python 3.11 .venv && ~/.local/bin/uv pip install --python .venv/bin/python -r requirements.lock
+brian2==2.9.0
+numpy==2.2.6        # brian2 2.9.0 fails with numpy>=2.3 (ndarray.ptp removed)
+torch==2.15.0       # CPU / Apple MPS build from PyPI
+scipy==1.17.1
+pandas==3.1.1
+pyarrow
+matplotlib
+seaborn
+tqdm
+pyyaml
+requests
+joblib              # imported by Shiu's model.py
+tabulate
+statsmodels

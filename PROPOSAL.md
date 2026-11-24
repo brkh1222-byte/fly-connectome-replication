@@ -50,7 +50,7 @@ All of this rests on **one fly's wiring diagram**. Two more whole-CNS connectome
 
 | Dataset | Access | Notes |
 |---|---|---|
-| **FlyWire v783** | Zenodo 10.5281/zenodo.10676866 (connections ~852 MB) + Shiu repo files | Use Zenodo, **not** flywire.ai. The flywire.ai terms require a parent or guardian to agree for users under 18. |
+| **FlyWire v783** | Zenodo 10.5281/zenodo.10676866 (connections ~852 MB) + Shiu repo files | Use the versioned Zenodo release for reproducibility. |
 | **Male CNS v1.0** | `gs://flyem-male-cns/v1.0/...` (weights ~1.1 GB, annotations, neurotransmitters); male-cns.janelia.org/download | Bulk bucket; neuPrint not needed |
 | **BANC v888** | Harvard Dataverse doi:10.7910/DVN/7WTH1N | File sizes and login requirement unverified (T1.3) |
 | Cross-dataset cell-type matches | Dataset annotations; taste-neuron types (e.g. LB3b/LB3c ↔ Gr64f sugar) | Build a matching table |
