@@ -147,16 +147,19 @@ def fig_ladder(norm="N1"):
         if pb:
             d = d[d.pairbase == pb]
         d = d.dropna(subset=["rho"])
-        for pr, dd in d.groupby("protocol"):
-            ax.plot(x + rng.uniform(-0.25, 0.25, len(dd)), dd.rho, mk.get(pr, "o"), ms=3, alpha=0.55,
-                    color="#444444", mec="none", label=pr if x == 0 else None)
+        for (pr, ra), dd in d.groupby(["protocol", "any_runaway"]):
+            ax.plot(x + rng.uniform(-0.25, 0.25, len(dd)), dd.rho, mk.get(pr, "o"), ms=3.5, alpha=0.7,
+                    color="#444444", mfc="none" if ra else "#444444", mew=0.6)
         if len(d):
             ax.plot([x - 0.3, x + 0.3], [d.rho.median()] * 2, "-", color="#c0392b", lw=1.5)
     ax.axhline(0, color="k", lw=0.4)
     ax.set_xticks(range(len(names))); ax.set_xticklabels(names, fontsize=6.5)
     ax.set_ylabel("Spearman ρ of cell-type response profiles")
-    ax.legend(frameon=False, fontsize=6, ncol=5, loc="lower left")
-    ax.set_title(f"Agreement ladder ({norm}, Shiu signs); red = median over protocols and sides", fontsize=7)
+    from matplotlib.lines import Line2D
+    h = [Line2D([], [], marker=m, ls="", color="#444444", ms=3.5, label=k.replace("_", "-")) for k, m in mk.items()]
+    h.append(Line2D([], [], marker="o", ls="", color="#444444", mfc="none", ms=3.5, label="brain-wide activity in either network"))
+    ax.legend(handles=h, frameon=False, fontsize=6, ncol=3, loc="upper right")
+    ax.set_title(f"Agreement ladder ({norm}, Shiu signs), PRELIMINARY Mac-scale; red = median", fontsize=7)
     fig.tight_layout(); save(fig, f"fig5_ladder_{norm}")
 
 
