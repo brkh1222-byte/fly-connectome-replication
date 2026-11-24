@@ -35,9 +35,10 @@ So MPS works best with small batches (`--max_rows 60`). One core battery
 (12 exps × 30 trials × 1 s) takes about 21 min per variant on MPS under load.
 
 ## Running now (detached with nohup; both resumable, so just re-run the same command)
-- Main runs (MPS): `nohup bash scripts/mac_main.sh '<12 variants json>' > results/mac_main.log &`
-  The variants are flywire/banc/malecns × {N1, N0, N1+nt, N2}, batteries core then core_rep.
-  The exact JSON is in the 1ec10f9 commit message context and in STATUS history. Outputs go to
+- Main runs (MPS): `nohup bash scripts/mac_main.sh main > results/mac_main.log &`
+  (`main` = experiments.MAIN = flywire/banc/malecns × {N1, N0, N2} own signs + N1 nt signs; the
+  currently running job uses the same 12 variants as explicit JSON). Batteries core then
+  core_rep. Outputs go to
   results/runs/*/core*.npz and results/ledger.csv. About 20-30 min per variant-battery under
   load, so about 10-12 h in total.
 - Brian2 reproduction: `nohup caffeinate -i nice .venv/bin/python src/repro_shiu.py > results/repro_shiu.log &`
