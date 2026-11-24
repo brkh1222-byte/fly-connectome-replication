@@ -34,20 +34,26 @@ Benchmark (FlyWire core battery, 50 ms runs, under load):
 So MPS works best with small batches (`--max_rows 60`). One core battery
 (12 exps × 30 trials × 1 s) takes about 21 min per variant on MPS under load.
 
-## Running now (detached with nohup; both resumable, so just re-run the same command)
-- Main runs (MPS): `nohup bash scripts/mac_main.sh main > results/mac_main.log &`
-  (`main` = experiments.MAIN = flywire/banc/malecns × {N1, N0, N2} own signs + N1 nt signs; the
-  currently running job uses the same 12 variants as explicit JSON). Batteries core then
-  core_rep. Outputs go to
-  results/runs/*/core*.npz and results/ledger.csv. About 20-30 min per variant-battery under
-  load, so about 10-12 h in total.
+## Running now (2026-11-25 ~01:35; all detached with nohup and resumable)
+- `scripts/mac_main.sh` (started 00:44): main core runs on MPS. No variant had finished after
+  50 min (machine overloaded).
+- `scripts/mac_queue.sh` (log: results/mac_queue.log): waits for 6 main core items, stops
+  mac_main, then runs the preliminary queue in priority order: main N1/N0 core → degraded
+  FlyWire→BANC (N0, N1) and shuffles (N1), 5 seeds each → core_rep, core_bal (D10) → nt signs
+  → N2. **To restart after any stop: `nohup bash scripts/mac_queue.sh > results/mac_queue.log 2>&1 &`**
+  (finished items are skipped; progress in results/ledger.csv).
 - Brian2 reproduction: `nohup caffeinate -i nice .venv/bin/python src/repro_shiu.py > results/repro_shiu.log &`
+  (7/37 runs done at 01:16).
+
+## Researcher's choices (25 Nov)
+Framing (a); rent a 4090 later (no SSH yet; do not wait); Shiu's signs primary. Commit
+messages now end with `Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>`.
 
 ## Next steps
-1. When main runs land: `python src/analysis.py` → results/replication_table.csv,
-   agreement_ladder.csv, agreement_summary.csv. Then figures (src/figures.py) and paper results.
-2. Degraded-FlyWire and shuffle copies: a few on the Mac
-   (`src/experiments.py --variants degrade --n 5`), the full set on the 4090.
-3. When the researcher provides SSH details: clone the repo on the box and run
-   `bash scripts/run_sweeps.sh`; rsync results back (docs/cloud_runbook.md §2).
-4. Fill paper/sections/results.tex, discussion, abstract; paper/notes.md with sources.
+1. As items land: `.venv/bin/python src/analysis.py --norms N1,N0` → replication_table.csv,
+   agreement_ladder.csv, agreement_summary.csv (label PRELIMINARY).
+2. Figures: `.venv/bin/python src/figures.py fig_repro fig_replication fig_ladder`
+   (fig2_validation and fig3_datasets are done).
+3. Fill paper/sections/results.tex (scaffold exists), discussion, abstract; add every number
+   to paper/notes.md (started).
+4. When SSH details arrive: docs/cloud_runbook.md.
