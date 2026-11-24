@@ -96,3 +96,16 @@ il3LN6, which cerebro-mosca showed causes a right-side sugar runaway; our 100 ms
 reproduced it. The primary analysis keeps Shiu's signs, since the aim is to replicate the
 published model. The "nt" and "type" sign schemes are run in the sweep, and the hemisphere
 rung is reported under both "own" and "nt" signs.
+
+## Researcher's choices (2026-11-25, relayed by the coordinator)
+- Framing (a): "explaining the FlyWire-BANC gap"; the degraded-FlyWire test and three
+  connectomes are the headline; cerebro-mosca is cited prominently.
+- Cloud: rent one RTX 4090 and run the full grid (the researcher rents; Claude drives over SSH).
+- Signs: Shiu's own signs are the main result; the transmitter-rule variant is reported alongside.
+
+## D10. Lopsided BANC sensory typing in hemisphere analyses
+BANC's typed sensory neurons are unbalanced by side (water 3 L vs 15 R; JO-F 37 vs 108; sugar
+32 vs 45). The BANC hemisphere rung is reported per protocol with water and JO-F flagged, and
+repeated with the larger side randomly subsampled to the smaller side's count. Between-fly
+comparisons use the same side in both connectomes, so they are also affected for water-L;
+this is listed as a limitation.
