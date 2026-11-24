@@ -15,7 +15,7 @@ Work top to bottom. Tick boxes as tasks complete. Read PROPOSAL.md and CLAUDE.md
 - [x] **T1.4** Write `src/standardise.py` to convert all three datasets to a common format: `neurons.parquet` (id, type, side, superclass, neurotransmitter, sign) and `edges.parquet` (pre, post, n_syn). Record summary statistics per dataset (neuron count, edge count, synapse density) in `results/dataset_summary.csv`.
 
 ## Phase 2: Reproduce
-- [ ] **T2.1** (IN PROGRESS: Brian2 v630/v783 curves, src/repro_shiu.py) Run Shiu's Brian2 model on FlyWire v783: sugar GRN stimulation → MN9.
+- [x] **T2.1** (done: results/repro_shiu.csv, results/repro_sugar_mn9.png, paper/figures/fig1_repro) Run Shiu's Brian2 model on FlyWire v783: sugar GRN stimulation → MN9.
   *Done when:* MN9 activates as in the paper; the figure is in `results/repro_sugar_mn9.png`.
 - [x] **T2.2** Write `src/lif_torch.py`, a batched sparse LIF in PyTorch with the same equations and parameters as Shiu.
   *Done when:* firing rates match Brian2 within seed noise on 3 experiments (`results/gpu_validation.md`).

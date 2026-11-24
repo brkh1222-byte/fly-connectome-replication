@@ -1,0 +1,61 @@
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 630 --exp sugarR --rate 140 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v630_sugarR_140Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 630 --exp sugarR --rate 160 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v630_sugarR_160Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 630 --exp sugarR --rate 180 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v630_sugarR_180Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 630 --exp sugarR --rate 200 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v630_sugarR_200Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp sugarR --rate 20 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_sugarR_20Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp sugarR --rate 40 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_sugarR_40Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp sugarR --rate 60 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_sugarR_60Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp sugarR --rate 80 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_sugarR_80Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp sugarR --rate 100 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_sugarR_100Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp sugarR --rate 120 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_sugarR_120Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp sugarR --rate 140 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_sugarR_140Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp sugarR --rate 160 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_sugarR_160Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp sugarR --rate 180 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_sugarR_180Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp sugarR --rate 200 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_sugarR_200Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp sugarR --rate 100 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_sugarR_100Hz_bitterR_0Hz --exp2 bitterR --rate2 0
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp sugarR --rate 100 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_sugarR_100Hz_bitterR_50Hz --exp2 bitterR --rate2 50
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp sugarR --rate 100 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_sugarR_100Hz_bitterR_100Hz --exp2 bitterR --rate2 100
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp sugarR --rate 100 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_sugarR_100Hz_bitterR_200Hz --exp2 bitterR --rate2 200
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp waterR --rate 100 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_waterR_100Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp waterR --rate 200 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_waterR_200Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp waterR --rate 260 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_waterR_260Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp JO_CE --rate 100 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_JO_CE_100Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp JO_F --rate 100 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_JO_F_100Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp JO_CE --rate 160 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_JO_CE_160Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp JO_F --rate 160 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_JO_F_160Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp JO_CE --rate 220 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_JO_CE_220Hz
+/Users/berkh/Desktop/fly-connectome-replication/src/shiu_brian2.py --version 783 --exp JO_F --rate 220 --trials 30 --seed 5 --out /Users/berkh/Desktop/fly-connectome-replication/results/brian2/v783_JO_F_220Hz
+                                run version    stim  rate    stim2  rate2 readout    mean_hz    sem_hz  n_active_mean
+0                  v630_sugarR_20Hz     630  sugarR    20      NaN      0   MN9_L   0.000000  0.000000      48.166667
+1                  v630_sugarR_40Hz     630  sugarR    40      NaN      0   MN9_L   5.400000  0.804585     149.566667
+2                  v630_sugarR_60Hz     630  sugarR    60      NaN      0   MN9_L  39.600000  1.201149     306.233333
+3                  v630_sugarR_80Hz     630  sugarR    80      NaN      0   MN9_L  57.200000  0.882004     344.133333
+4                 v630_sugarR_100Hz     630  sugarR   100      NaN      0   MN9_L  67.733333  1.010216     357.700000
+5                 v630_sugarR_120Hz     630  sugarR   120      NaN      0   MN9_L  75.500000  0.974090     366.066667
+6                 v630_sugarR_140Hz     630  sugarR   140      NaN      0   MN9_L  80.966667  0.833885     376.166667
+7                 v630_sugarR_160Hz     630  sugarR   160      NaN      0   MN9_L  85.533333  0.697670     383.666667
+8                 v630_sugarR_180Hz     630  sugarR   180      NaN      0   MN9_L  90.666667  0.856796     395.033333
+9                 v630_sugarR_200Hz     630  sugarR   200      NaN      0   MN9_L  94.033333  0.692295     403.033333
+10                 v783_sugarR_20Hz     783  sugarR    20      NaN      0   MN9_L   0.000000  0.000000      45.466667
+11                 v783_sugarR_40Hz     783  sugarR    40      NaN      0   MN9_L   3.433333  0.502141     134.733333
+12                 v783_sugarR_60Hz     783  sugarR    60      NaN      0   MN9_L  29.133333  1.301399     288.266667
+13                 v783_sugarR_80Hz     783  sugarR    80      NaN      0   MN9_L  52.233333  0.639115     338.333333
+14                v783_sugarR_100Hz     783  sugarR   100      NaN      0   MN9_L  61.300000  0.923698     350.333333
+15                v783_sugarR_120Hz     783  sugarR   120      NaN      0   MN9_L  69.133333  0.742369     360.433333
+16                v783_sugarR_140Hz     783  sugarR   140      NaN      0   MN9_L  76.866667  0.813299     366.666667
+17                v783_sugarR_160Hz     783  sugarR   160      NaN      0   MN9_L  81.733333  1.043792     374.266667
+18                v783_sugarR_180Hz     783  sugarR   180      NaN      0   MN9_L  86.500000  0.771251     384.333333
+19                v783_sugarR_200Hz     783  sugarR   200      NaN      0   MN9_L  89.133333  1.026917     395.000000
+20    v783_sugarR_100Hz_bitterR_0Hz     783  sugarR   100  bitterR      0   MN9_L  61.800000  0.752620     352.100000
+21   v783_sugarR_100Hz_bitterR_50Hz     783  sugarR   100  bitterR     50   MN9_L  33.733333  1.191863     347.933333
+22  v783_sugarR_100Hz_bitterR_100Hz     783  sugarR   100  bitterR    100   MN9_L   3.566667  0.446399     292.600000
+23  v783_sugarR_100Hz_bitterR_200Hz     783  sugarR   100  bitterR    200   MN9_L   0.033333  0.033333     203.166667
+24                v783_waterR_100Hz     783  waterR   100      NaN      0   MN9_L   0.000000  0.000000      80.800000
+25                v783_waterR_200Hz     783  waterR   200      NaN      0   MN9_L  31.666667  0.850062     246.800000
+26                v783_waterR_260Hz     783  waterR   260      NaN      0   MN9_L  52.000000  0.904650     325.766667
+27                 v783_JO_CE_100Hz     783   JO_CE   100      NaN      0    aBN1  25.833333  0.472419     239.300000
+28                  v783_JO_F_100Hz     783    JO_F   100      NaN      0    aBN1   0.933333  0.185282      84.966667
+29                 v783_JO_CE_160Hz     783   JO_CE   160      NaN      0    aBN1  55.566667  0.274106     317.866667
+30                  v783_JO_F_160Hz     783    JO_F   160      NaN      0    aBN1   1.333333  0.289007      99.366667
+31                 v783_JO_CE_220Hz     783   JO_CE   220      NaN      0    aBN1  73.533333  0.290593     395.933333
+32                  v783_JO_F_220Hz     783    JO_F   220      NaN      0    aBN1   4.766667  0.443817     124.433333

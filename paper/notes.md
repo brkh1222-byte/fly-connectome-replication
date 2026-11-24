@@ -36,3 +36,14 @@ results are marked PRELIMINARY: they will be replaced by the full grid (`src/swe
 
 ## Brian2 reproduction, replication table, ladder, controls
 (Filled below as runs finish.)
+
+## Brian2 reproduction of Shiu et al. (final; 30 trials × 1 s each; results/repro_shiu.csv)
+| Number | Value |
+|---|---|
+| Sugar GRNs (Shiu's list) → MN9, v783, 40 / 100 / 200 Hz | 3.4 / 61.3 / 89.1 Hz |
+| Same, v630 (as published) | 5.4 / 67.7 / 94.0 Hz |
+| Sugar 100 Hz + bitter 0 / 50 / 100 / 200 Hz → MN9 (v783) | 61.8 / 33.7 / 3.6 / 0.03 Hz |
+| Water GRNs 100 / 200 / 260 Hz → MN9 (v783) | 0.0 / 31.7 / 52.0 Hz |
+| JO-CE vs JO-F → aBN1 at 100 / 160 / 220 Hz (v783) | 25.8 vs 0.9 / 55.6 vs 1.3 / 73.5 vs 4.8 Hz |
+Not compared numerically with Shiu's published curves (their raw outputs were not downloaded);
+the qualitative results match their Figs 1, 3, 4, 5.
