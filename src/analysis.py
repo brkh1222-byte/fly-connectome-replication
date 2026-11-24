@@ -113,10 +113,14 @@ def ladder(norm="N1", sign="own", threshold=1, subgraph="brain", n_copies=50, n_
         if ra is None or rb is None or ea not in ra or eb not in rb:
             return
         c = A.compare(_prof(va, ra, ea), _prof(vb, rb, eb), n_boot=n_boot)
+        fa = ra[ea]["n_active"] / NN[va["dataset"]]
+        fb = rb[eb]["n_active"] / NN[vb["dataset"]]
         rows.append(dict(rung=rung, pair=pair, protocol=proto, side=side, norm=norm, sign=sign,
-                         threshold=threshold, **c))
+                         threshold=threshold, frac_active_a=fa, frac_active_b=fb,
+                         any_runaway=bool(max(fa, fb) > 0.02), **c))
 
     V = {d: dict(base, dataset=d) for d in C.DATASETS}
+    NN = {d: len(neurons_for(V[d])) for d in C.DATASETS}
     R = {d: get(V[d]) for d in C.DATASETS}
     Rr = {d: get(V[d], "core_rep") for d in C.DATASETS}
     Rb = {d: get(V[d], "core_bal") for d in C.DATASETS}
@@ -155,6 +159,26 @@ def ladder(norm="N1", sign="own", threshold=1, subgraph="brain", n_copies=50, n_
     return pd.DataFrame(rows)
 
 
+def activity(norms, signs=("own", "nt")):
+    """Mean number of active neurons and readout rates for every base run that exists."""
+    rows = []
+    for nm in norms:
+        for sg in signs:
+            for d in C.DATASETS:
+                v = dict(dataset=d, subgraph="brain", threshold=1, norm=nm, sign=sg)
+                res = get(v)
+                if res is None:
+                    continue
+                n = len(neurons_for(v))
+                for exp, r in res.items():
+                    rows.append(dict(dataset=d, norm=nm, sign=sg, exp=exp, n_active=r["n_active"],
+                                     frac_active=r["n_active"] / n,
+                                     runaway=bool(r["n_active"] / n > 0.02),
+                                     MN9=float(np.nanmean(r["ro"][:, :2])),
+                                     aBN1=float(np.nanmean(r["ro"][:, 2:]))))
+    return pd.DataFrame(rows)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--norms", default="N0,N1,N2")
@@ -167,6 +191,8 @@ def main():
         lads.append(ladder(norm=nm, n_boot=a.n_boot))
     rep = pd.concat(reps)
     lad = pd.concat(lads)
+    act = activity(a.norms.split(","))
+    act.to_csv(out / "activity_table.csv", index=False)
     rep.to_csv(out / "replication_table.csv", index=False)
     lad.to_csv(out / "agreement_ladder.csv", index=False)
     if len(lad):
@@ -176,6 +202,11 @@ def main():
             rho_q05=("rho", lambda x: x.quantile(0.05)), rho_q95=("rho", lambda x: x.quantile(0.95)),
             jaccard_median=("jaccard", "median"), n=("rho", "count")).reset_index()
         summ.to_csv(out / "agreement_summary.csv", index=False)
+        calm = lad[~lad.any_runaway].groupby(["norm", "rung", "pairbase"]).agg(
+            rho_median=("rho", "median"), rho_mean=("rho", "mean"),
+            jaccard_median=("jaccard", "median"), n=("rho", "count")).reset_index()
+        calm.to_csv(out / "agreement_summary_no_runaway.csv", index=False)  # exploratory (D11)
+        print("no-runaway pairs only (exploratory):"); print(calm.to_string())
         print(summ.to_string())
     print(rep.to_string())
 

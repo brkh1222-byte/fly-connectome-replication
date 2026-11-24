@@ -34,16 +34,22 @@ Benchmark (FlyWire core battery, 50 ms runs, under load):
 So MPS works best with small batches (`--max_rows 60`). One core battery
 (12 exps × 30 trials × 1 s) takes about 21 min per variant on MPS under load.
 
-## Running now (2026-11-25 ~01:35; all detached with nohup and resumable)
-- `scripts/mac_main.sh` (started 00:44): main core runs on MPS. No variant had finished after
-  50 min (machine overloaded).
-- `scripts/mac_queue.sh` (log: results/mac_queue.log): waits for 6 main core items, stops
-  mac_main, then runs the preliminary queue in priority order: main N1/N0 core → degraded
-  FlyWire→BANC (N0, N1) and shuffles (N1), 5 seeds each → core_rep, core_bal (D10) → nt signs
-  → N2. **To restart after any stop: `nohup bash scripts/mac_queue.sh > results/mac_queue.log 2>&1 &`**
-  (finished items are skipped; progress in results/ledger.csv).
-- Brian2 reproduction: `nohup caffeinate -i nice .venv/bin/python src/repro_shiu.py > results/repro_shiu.log &`
-  (7/37 runs done at 01:16).
+## Running now (2026-11-25 03:15; all detached, resumable; restart = same command)
+- `nohup bash scripts/mac_queue.sh > results/mac_queue.log 2>&1 &` (MPS; about 43 min per item):
+  main N1 core DONE for all three (01:29, 02:11, 02:54); now N0 core; then degrade→BANC
+  seed 0 (N0, N1), shuffle seed 0, ..., core_rep, core_bal, nt signs, N2.
+- `nohup bash scripts/mac_cpu_worker.sh > results/mac_cpu_worker.log 2>&1 &` (CPU; starts
+  when repro_shiu finishes): degrade/shuffle seeds 2 and 1.
+- `nohup caffeinate -i nice .venv/bin/python src/repro_shiu.py > results/repro_shiu.log &`
+  (30/37 at 03:01).
+
+## Preliminary results so far (N1, own signs; results/replication_table.csv,
+## agreement_ladder.csv, agreement_summary*.csv, activity_table.csv)
+- FlyWire L: sugar→MN9 72 Hz, bitter suppression 85%, JO-CE→aBN1 34 Hz, water→MN9 0 Hz.
+- BANC N1: sugar→MN9 0 Hz (L); JO-CE→aBN1 22 Hz (L) but in a runaway state (13k active).
+- Male CNS N1: sugar→MN9 5.7 (L) / 30.5 Hz (R); JO-CE→aBN1 85 / 56 Hz; bitter runaway (9k active).
+- Ladder medians: hemisphere FlyWire 0.35, BANC 0.07, male CNS 0.52; FlyWire-BANC 0.21,
+  FlyWire-male CNS 0.10, BANC-male CNS 0.03. Runaway states dominate (decision D11).
 
 ## Researcher's choices (25 Nov)
 Framing (a); rent a 4090 later (no SSH yet; do not wait); Shiu's signs primary. Commit

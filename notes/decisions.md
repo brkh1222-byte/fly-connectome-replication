@@ -109,3 +109,20 @@ BANC's typed sensory neurons are unbalanced by side (water 3 L vs 15 R; JO-F 37 
 repeated with the larger side randomly subsampled to the smaller side's count. Between-fly
 comparisons use the same side in both connectomes, so they are also affected for water-L;
 this is listed as a limitation.
+
+## D11. "Runaway" label and what the first N1 results showed (2026-11-25, preliminary)
+In the first N1 runs, some protocols put a network into a brain-wide active state (8,000 to
+13,000 active neurons, versus under about 1,300 otherwise): FlyWire right sugar (the known
+il3LN6 sign error), BANC left JO-CE / right sugar / right water, and male CNS bitter (both
+sides) / left JO-CE. Agreement metrics are dominated by whether both networks are in the same
+regime. We therefore (i) report a descriptive `runaway` flag per experiment (more than 2% of
+brain neurons active; results/activity_table.csv), chosen after seeing the data and labelled
+as such; (ii) keep the pre-specified metrics unchanged; and (iii) additionally report ladder
+medians restricted to pairs where neither network is in runaway, marked exploratory.
+Male CNS neurons with transmitter "unclear" (14,365) are excitatory under Shiu's rule ("all
+others excitatory"); this is kept and listed as a limitation.
+
+## D12. A second, CPU worker for preliminary nulls
+Once the Brian2 reproduction finishes, a CPU job runs degrade/shuffle seeds 2 and 1 while the
+MPS queue runs seeds 0 upward (two heavy processes in total). Seeds are per item, so results
+do not depend on the device.
