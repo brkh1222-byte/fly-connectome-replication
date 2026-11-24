@@ -93,78 +93,101 @@ class Network:
         first = torch.cumsum(cnt, 0) - cnt
         pos = starts[rep] + (torch.arange(total, device=self.device) - first[rep])
         tgt = sb[rep] * self.n + self.indices[pos]
-        w = self.data[pos] * not_ref_flat[tgt]
+        w = self.data[pos] * not_ref_flat[tgt].to(self.dtype)
         g.view(-1).index_add_(0, tgt, w)
 
     @torch.no_grad()
-    def run(self, n_trials, stim, seed=0, t_run=None, record_spikes=False):
-        """Simulate n_trials independent trials.
+    def run(self, n_trials, stim, seed=0, t_run=None):
+        """Simulate n_trials trials of one experiment. stim: list of (indices, rate_Hz).
+        Returns counts (n_trials, N) int32 on CPU."""
+        return self.run_batch([stim], n_trials, seed=seed, t_run=t_run)[0]
 
-        stim: list of (indices, rate_Hz) groups driven by Poisson input.
-        Returns counts (n_trials, N) int32 tensor on CPU, and optionally a list of
-        (step, trial, neuron) spike arrays.
+    @torch.no_grad()
+    def run_batch(self, exps, n_trials, seed=0, t_run=None, return_device=False):
+        """Simulate several experiments at once; each gets n_trials rows of the state matrix.
+
+        exps: list of experiments; each experiment is a list of (indices, rate_Hz) groups
+              driven by Poisson input (rfc = 0 for driven neurons in that experiment only).
+        Returns counts (n_exp, n_trials, N) int32 (CPU unless return_device).
         """
         p = self.p
-        dev, dt_, N, B = self.device, self.dtype, self.n, int(n_trials)
+        dev, dt_, N = self.device, self.dtype, self.n
+        E, R = len(exps), int(n_trials)
+        B = E * R
         T = int(round((t_run or p.t_run) / p.dt))
         d = int(round(p.t_dly / p.dt))
-        rfc_steps = torch.full((N,), int(round(p.t_rfc / p.dt)), dtype=torch.int32, device=dev)
-        gen = torch.Generator(device="cpu").manual_seed(int(seed))
+        rfc_default = int(round(p.t_rfc / p.dt))
 
         # exact propagators (Brian2 'linear')
         a_g = math.exp(-p.dt / p.tau)
         a_v = math.exp(-p.dt / p.t_mbr)
         k_vg = p.tau / (p.t_mbr - p.tau) * (math.exp(-p.dt / p.t_mbr) - math.exp(-p.dt / p.tau))
+        kick = p.w_syn * p.f_poi
+
+        # union of driven neurons and per-row Bernoulli probabilities
+        union = sorted({int(i) for ex in exps for idx, _ in ex for i in np.atleast_1d(idx)})
+        U = len(union)
+        col = {n_: k for k, n_ in enumerate(union)}
+        prob = torch.zeros((B, max(U, 1)), dtype=torch.float32)
+        rfc = torch.full((B, N), rfc_default, dtype=torch.int16)
+        for e, ex in enumerate(exps):
+            for idx, rate in ex:
+                idx = np.atleast_1d(np.asarray(idx, dtype=np.int64))
+                if idx.size == 0:
+                    continue
+                cols = [col[int(i)] for i in idx]
+                prob[e * R:(e + 1) * R, cols] = float(rate) * p.dt * 1e-3
+                rfc[e * R:(e + 1) * R, torch.as_tensor(idx)] = 0
+        prob = prob.to(dev)
+        rfc = rfc.to(dev)
+        uidx = torch.as_tensor(union, dtype=torch.int64, device=dev)
+
+        try:
+            gen = torch.Generator(device=dev)
+        except RuntimeError:
+            gen = None
+        if gen is not None:
+            gen.manual_seed(int(seed))
+            rand = lambda: torch.rand((B, max(U, 1)), generator=gen, device=dev)
+        else:  # pragma: no cover - backends without device generators
+            cg = torch.Generator().manual_seed(int(seed))
+            rand = lambda: torch.rand((B, max(U, 1)), generator=cg).to(dev)
 
         v = torch.full((B, N), p.v_0, dtype=dt_, device=dev)
         g = torch.zeros((B, N), dtype=dt_, device=dev)
-        last = torch.full((B, N), -10 ** 6, dtype=torch.int32, device=dev)
+        since = torch.full((B, N), 30000, dtype=torch.int16, device=dev)  # steps since spike (saturating)
         counts = torch.zeros((B, N), dtype=torch.int32, device=dev)
-
-        st_idx, st_p = [], []
-        for idx, rate in stim:
-            idx = torch.as_tensor(np.asarray(idx, dtype=np.int64), device=dev)
-            if idx.numel() == 0:
-                continue
-            rfc_steps[idx] = 0
-            st_idx.append(idx)
-            st_p.append(float(rate) * p.dt * 1e-3)
-        kick = p.w_syn * p.f_poi
         queue = [None] * d  # ring buffer of (sb, sj) spikes waiting to be delivered
-        spikes_out = []
 
         for t in range(T):
             # 1) state update (groups slot) for non-refractory neurons
-            not_ref = (t - last) >= rfc_steps
-            g_new = g * a_g
-            v_new = p.v_0 + (v - p.v_0) * a_v + k_vg * g
+            since.add_(1).clamp_(max=30000)
+            not_ref = since >= rfc
+            v_new = (v - p.v_0).mul_(a_v).add_(g, alpha=k_vg).add_(p.v_0)
             v = torch.where(not_ref, v_new, v)
-            g = torch.where(not_ref, g_new, g)
+            g = torch.where(not_ref, g * a_g, g)
             # 2) threshold
             spk = (v > p.v_th) & not_ref
             sb, sj = torch.nonzero(spk, as_tuple=True)
-            if sj.numel():
-                last[sb, sj] = t
+            has = sj.numel() > 0
+            if has:
+                since[sb, sj] = 0
                 not_ref[sb, sj] = False
                 counts[sb, sj] += 1
-                if record_spikes:
-                    spikes_out.append((t, sb.cpu().numpy(), sj.cpu().numpy()))
             # 3) synapses: deliver spikes emitted d steps ago; Poisson kicks
             old = queue[t % d]
             if old is not None:
-                self._deliver(old[0], old[1], g, not_ref.view(-1).to(dt_))
-            queue[t % d] = (sb, sj)
-            for idx, pr in zip(st_idx, st_p):
-                hit = torch.rand((B, idx.numel()), generator=gen) < pr
-                if hit.any():
-                    hit = hit.to(dev)
-                    v[:, idx] += kick * hit.to(dt_) * not_ref[:, idx].to(dt_)
+                self._deliver(old[0], old[1], g, not_ref.view(-1))
+            queue[t % d] = (sb, sj) if has else None
+            if U:
+                hit = (rand() < prob) & not_ref[:, uidx]
+                v[:, uidx] += kick * hit.to(dt_)
             # 4) reset
-            if sj.numel():
+            if has:
                 v[sb, sj] = p.v_rst
                 g[sb, sj] = 0.0
-        out = counts.cpu()
-        return (out, spikes_out) if record_spikes else out
+        out = counts.view(E, R, N)
+        return out if return_device else out.cpu()
 
 
 def load_shiu(version="783", root=None):
