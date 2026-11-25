@@ -34,22 +34,21 @@ Benchmark (FlyWire core battery, 50 ms runs, under load):
 So MPS works best with small batches (`--max_rows 60`). One core battery
 (12 exps × 30 trials × 1 s) takes about 21 min per variant on MPS under load.
 
-## Running now (2026-11-25 03:15; all detached, resumable; restart = same command)
-- `nohup bash scripts/mac_queue.sh > results/mac_queue.log 2>&1 &` (MPS; about 43 min per item):
-  main N1 core DONE for all three (01:29, 02:11, 02:54); now N0 core; then degrade→BANC
-  seed 0 (N0, N1), shuffle seed 0, ..., core_rep, core_bal, nt signs, N2.
-- `nohup bash scripts/mac_cpu_worker.sh > results/mac_cpu_worker.log 2>&1 &` (CPU; starts
-  when repro_shiu finishes): degrade/shuffle seeds 2 and 1.
-- `nohup caffeinate -i nice .venv/bin/python src/repro_shiu.py > results/repro_shiu.log &`
-  (30/37 at 03:01).
+## Running now (2026-11-25 10:30)
+- `nohup bash scripts/mac_queue.sh > results/mac_queue.log 2>&1 &` (MPS; resumable). Done:
+  main N1 and N0 core (all three), degrade→BANC seeds 0-2 (N0, N1), shuffles seeds 0-2 (N1).
+  Now: core_rep N1 (seed rung), then core_bal (D10), nt signs, N2, seeds 3-4, core_rep N0.
+- CPU worker finished (seeds 1, 2). Brian2 reproduction finished (T2.1 done).
 
-## Preliminary results so far (N1, own signs; results/replication_table.csv,
-## agreement_ladder.csv, agreement_summary*.csv, activity_table.csv)
-- FlyWire L: sugar→MN9 72 Hz, bitter suppression 85%, JO-CE→aBN1 34 Hz, water→MN9 0 Hz.
-- BANC N1: sugar→MN9 0 Hz (L); JO-CE→aBN1 22 Hz (L) but in a runaway state (13k active).
-- Male CNS N1: sugar→MN9 5.7 (L) / 30.5 Hz (R); JO-CE→aBN1 85 / 56 Hz; bitter runaway (9k active).
-- Ladder medians: hemisphere FlyWire 0.35, BANC 0.07, male CNS 0.52; FlyWire-BANC 0.21,
-  FlyWire-male CNS 0.10, BANC-male CNS 0.03. Runaway states dominate (decision D11).
+## Preliminary analysis DONE (commits 5172f74, 119b082)
+`.venv/bin/python src/analysis.py --norms N1,N0` writes replication_table.csv,
+agreement_ladder.csv, agreement_summary*.csv, completeness_test.csv, control_readouts.csv,
+activity_table.csv. Figures: `src/figures.py fig_repro fig_replication fig_ladder`.
+Paper: results, discussion, abstract filled with preliminary numbers (paper/notes.md lists
+each with its source). Remaining todo items are the full-grid parts and the seed /
+balanced-hemisphere / nt-sign rungs (rerun analysis when the queue finishes them).
+Headline so far: degraded FlyWire loses sugar→MN9 like BANC (N0), but N1 rescues degraded
+FlyWire and not BANC, and FlyWire-BANC rho is below the degraded range: "partly explained".
 
 ## Researcher's choices (25 Nov)
 Framing (a); rent a 4090 later (no SSH yet; do not wait); Shiu's signs primary. Commit
