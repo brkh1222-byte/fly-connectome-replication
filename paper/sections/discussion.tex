@@ -1,6 +1,42 @@
-\todo{Discussion scaffold: (1) what replicates and what does not; (2) reconstruction vs
-individuality, relative to \citep{santos2026,yad2026}; (3) implications: calibrate synapse
-density before porting connectome models; (4) limitations: one animal per connectome; sex
-confounded with laboratory and pipeline; predicted transmitter signs; lopsided BANC sensory
-typing; brain-only subgraph omits ascending input; no gap junctions or neuromodulation;
-(5) future work.}
+\textbf{This discussion rests on preliminary laptop-scale results and will be revised when
+the full grid is run.} \todo{revise}
+
+The Shiu et al.\ model, run unchanged, reproduced its feeding and grooming predictions on the
+connectome it was built from, and those predictions disappeared when the wiring was shuffled.
+On the two other connectomes the outcome depended on synapse density. BANC, with about
+0.45 times FlyWire's input per cell type, was silent at the readouts. The male CNS, with
+about 1.76 times, reproduced the predictions only together with brain-wide activity. This
+confirms, with a third connectome, the conclusion of earlier ports that the per-synapse
+weight does not transfer between reconstructions \citep{santos2026,brainlab2026,fugsukjit2026}.
+
+The degraded-FlyWire control separates two parts of the FlyWire--BANC gap. Removing synapses
+from FlyWire until each cell type matched BANC's input abolished sugar$\to$MN9, so BANC's
+failure on this prediction as released needs no biological explanation. But one global
+rescaling brought the prediction back in degraded FlyWire and not in BANC, and BANC's
+response profiles were further from FlyWire's than those of any degraded copy. Uniform
+per-type synapse loss is therefore not sufficient. The remainder could come from
+non-uniform synapse detection within cell types or brain regions \citep{santos2026}, from
+different transmitter predictions, from differences in cell typing (for example, BANC has
+60 neurons typed LB3b against 25 in FlyWire), or from real differences between the two
+flies. Our control cannot distinguish these.
+
+The male CNS did not agree with FlyWire better than BANC did, and no pair of connectomes
+agreed as well as the two hemispheres of FlyWire or of the male CNS. Because each connectome
+differs from the others in animal, laboratory, pipeline and (for the male) sex at once, this
+ordering cannot be read as an effect of sex or individuality.
+
+A practical observation is that the model has two regimes, sparse and brain-wide, and that
+which one a network enters for a given stimulus is fragile: it changed with side, with
+normalisation and between connectomes. Rank-agreement metrics then mostly measure whether
+two networks are in the same regime. Reports of cross-connectome agreement should state the
+fraction of active neurons alongside any correlation.
+
+\textbf{Limitations.} Each connectome is one animal. Sex is confounded with laboratory and
+reconstruction pipeline. Signs come from predicted transmitters, and Shiu's rule makes every
+neuron that is not GABAergic or glutamatergic excitatory, including 14{,}365 male CNS neurons
+with an ``unclear'' prediction. BANC's typed sensory neurons are unbalanced between sides
+(water GRNs 3 vs 15; JO-F 37 vs 108), which weakens its hemisphere comparison. The degraded
+control thins synapses uniformly within a postsynaptic cell type, which is only one model of
+incompleteness. Two replication criteria were tightened after seeing the first tables
+(Methods). The brain-only subgraphs omit ascending input. The model has no gap junctions or
+neuromodulation. Water$\to$MN9 could not be tested at the common stimulation rate.

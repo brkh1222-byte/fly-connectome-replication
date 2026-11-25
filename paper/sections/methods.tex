@@ -5,14 +5,19 @@
 54{,}492{,}922 synapses, with no synapse-count threshold. Each presynaptic neuron's sign is as
 given in that file. Cell types, sides and super-classes come from Schlegel et al.\
 \citep{schlegel2024} (Supplemental File~1).
-\textbf{BANC v888.} \todo{fill from standardise.py: file, neuron count, brain subgraph,
-synapse table v2, NT predictions, matching to FlyWire types.}
+\textbf{BANC v888.} We used the neuron table (\texttt{banc\_888\_meta}), the connection
+table built from synapse table v2 (\texttt{banc\_888\_edgelist\_simple\_v2}) and the
+neuron-level transmitter predictions. We kept proofread neurons and dropped glia, giving
+150{,}802 neurons, of which 126{,}389 are in the central brain or optic lobes. A neuron's
+cell type is that of its FlyWire match (\texttt{fafb\_cell\_type}) when this is a FlyWire
+type name, otherwise its BANC type; 91.7\% of brain neurons received a FlyWire type.
 \textbf{Male CNS v1.0.} We used the connection table restricted to traced bodies with synapse
 confidence $\ge0.5$
 (\texttt{connectome-weights-male-cns-v1.0-minconf-0.5-traced-only}), the body annotations,
 and the neuron-level transmitter predictions (\texttt{predicted\_nt}). Cell types were
 harmonised to FlyWire names through the \texttt{flywireType} field, falling back to the male
-CNS type. \todo{counts}
+CNS type. This gave 165{,}122 neurons (144{,}717 in the brain subgraph); 94.9\% of the
+brain neurons have a FlyWire type.
 \textbf{Signs.} As in Shiu et al., GABA and glutamate are inhibitory and all other
 transmitters are excitatory. FlyWire used the signs in Shiu's file. BANC and the male CNS used
 their own neuron-level predictions (``own''). Two alternative sign schemes were tested in the
@@ -22,7 +27,7 @@ for FlyWire, the Schlegel \texttt{top\_nt}), and the majority sign of each cell 
 \textbf{Brain subgraph.} The primary analysis used the brain portion of each connectome,
 because FlyWire has no nerve cord. For the male CNS we removed bodies whose super-class is a
 nerve-cord class (\texttt{vnc\_*}, enteric, efferent-ascending) and kept descending and
-ascending neurons. \todo{BANC rule}. Whole-CNS networks were a secondary analysis.
+ascending neurons. For BANC we kept neurons whose region is central brain or optic lobe. Whole-CNS networks were a secondary analysis.
 
 \subsection*{Model}
 We used the Shiu et al.\ model unchanged \citep{shiu2024}. Each neuron $i$ has membrane
@@ -112,6 +117,11 @@ suppression replicated if MN9 during sugar plus bitter stimulation was lower tha
 alone (one-sided Mann--Whitney) and the suppression was at least 50\%. JO specificity
 replicated if aBN1 responded more to JO-C/E than to JO-F (one-sided Mann--Whitney).
 $p$-values across the non-FlyWire tests were Holm-corrected \citep{holm1979}.
+After the first tables we added one condition to the last two criteria: each also requires
+the underlying activation ($\ge5$\,Hz at the readout), because suppression of an absent
+response is not meaningful. We also added a descriptive label, ``brain-wide activity'', for
+experiments in which more than 2\% of neurons were active. Both were defined after seeing
+data.
 Simulation trials are the unit of replication. Confidence intervals therefore describe
 simulation noise and cell-type sampling, not variation across flies: each connectome is one
 animal.

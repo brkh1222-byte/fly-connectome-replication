@@ -1,7 +1,18 @@
 \begin{abstract}
-\todo{Write last. Skeleton: question (do predictions of the Shiu et al.\ whole-brain model
-transfer between individual connectomes, and is the reported FlyWire--BANC disagreement
-biological or technical?); design (three connectomes, float32 implementation validated
-against Brian2, agreement ladder, degree-preserving shuffles, degraded-FlyWire completeness
-control); main numbers; one-line verdict; limitation (one animal per connectome).}
+\textbf{[Draft abstract on preliminary laptop-scale results; numbers will change.]}
+The whole-brain leaky integrate-and-fire model of Shiu et al.\ predicts feeding and grooming
+circuits from the FlyWire connectome of one \textit{Drosophila}. Earlier ports found that
+its predictions transfer poorly to a second female connectome (BANC), but could not say
+whether the cause is biological or technical. We ran the unchanged model on FlyWire, BANC
+and the male CNS with a float32 implementation validated against the original Brian2 code
+(rate correlations 0.9994--0.9997). Per cell type, BANC carries 0.45 times and the male CNS
+1.76 times FlyWire's input synapses. With raw weights BANC lost sugar$\to$MN9 and
+JO$\to$aBN1, and the male CNS reproduced them only with brain-wide activity. Cell-type
+response profiles agreed weakly between connectomes (median Spearman $\rho$ 0.03--0.21)
+and better between hemispheres of FlyWire (0.35) and the male CNS (0.52). Thinning FlyWire
+to BANC's per-type input abolished sugar$\to$MN9, so reconstruction density alone explains
+that failure. It did not explain the rest: global rescaling rescued the thinned FlyWire but
+not BANC, and thinned FlyWire stayed closer to FlyWire ($\rho\approx0.5$) than BANC was.
+Completeness therefore explains part, but not all, of the cross-connectome gap.
+\todo{update after the full grid}
 \end{abstract}

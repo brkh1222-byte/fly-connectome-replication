@@ -9,8 +9,11 @@ Per-neuron rate correlations with Brian2 were 0.9994--0.9997, the same as betwee
 independent Brian2 runs (0.9995--0.9997). Readouts agreed: sugar$\to$MN9 62.7 vs 61.4\,Hz,
 sugar plus bitter 2.9 vs 3.5\,Hz, and JO-C/E$\to$aBN1 26.2 vs 25.9\,Hz (PyTorch vs Brian2;
 95\% confidence intervals overlap). \todo{CUDA row from results/gpu\_validation\_cuda.md.}
-\todo{Brian2 reproduction of Shiu's sugar$\to$MN9 rate curve on v630 and v783:
-results/repro\_shiu.csv, results/repro\_sugar\_mn9.png.}
+With Shiu's own neuron lists, the Brian2 model reproduced the published behaviour on both
+FlyWire versions (Fig.~\ref{fig:repro}; \texttt{results/repro\_shiu.csv}). Sugar GRN input at
+100\,Hz drove MN9 at 67.7\,Hz in v630 and 61.3\,Hz in v783. Bitter input at 100\,Hz reduced
+the v783 response to 3.6\,Hz. Water GRNs did not reach MN9 at 100\,Hz but did at 200\,Hz
+(31.7\,Hz). JO-C/E input at 160\,Hz drove aBN1 at 55.6\,Hz, against 1.3\,Hz for JO-F.
 
 \subsection*{The three connectomes differ about four-fold in synapse density}
 After standardisation the brain subgraphs held 138{,}639 (FlyWire), 126{,}389 (BANC) and
@@ -20,47 +23,105 @@ shared cell type, the median total input per neuron relative to FlyWire was 0.45
 (interquartile range 0.33--0.62) and 1.76 in the male CNS (1.40--2.27)
 (\texttt{results/type\_input\_comparison.csv}). The BANC deficit agrees with the 2.1-fold
 figure of \citep{santos2026}. Because $\Wsyn$ is a per-synapse weight tuned on FlyWire, the
-unchanged model is under-driven in BANC and over-driven in the male CNS. \todo{Fig. 3.}
+unchanged model is under-driven in BANC and over-driven in the male CNS. (Fig.~\ref{fig:datasets}).
 
 \subsection*{Replication of the validated predictions}
-\todo{Table 1 from results/replication\_table.csv: 5 predictions $\times$ 3 connectomes
-$\times$ N0/N1/N2, each side; readout rate, FlyWire rate, Holm $p$, verdict.}
-\todo{One paragraph per connectome. State next to our BANC numbers the values reported by
-\citep{santos2026} (sugar$\to$MN9 and JO$\to$aBN1 lost as released) and \citep{brainlab2026}
-(17.8\,Hz), and for the male CNS those of \citep{brainlab2026,fugsukjit2026}.}
+\textbf{All results in the remaining sections are preliminary.} They come from laptop-scale
+runs: one set of 30 trials per network, three degraded copies and three shuffles per
+connectome. The full grid (Methods) will replace them. \todo{replace with full-grid numbers}
+
+Table~\ref{tab:rep} lists the readouts (\texttt{results/replication\_table.csv}). With
+type-defined stimuli at 150\,Hz, FlyWire reproduced sugar$\to$MN9 (72.1\,Hz), bitter
+suppression (85\%) and JO-C/E$\to$aBN1 (34.1\,Hz, against 0.1\,Hz for JO-F) for left-side
+stimulation. Water GRNs (LB3a alone) did not reach MN9 at 150\,Hz in FlyWire, consistent with
+the 200\,Hz needed in the Brian2 reproduction, so water$\to$MN9 cannot be tested at this rate.
+Right-side sugar stimulation in FlyWire recruited about 8{,}500 neurons and left MN9 at
+1.4\,Hz. This is the brain-wide response that \citep{santos2026} traced to one mis-signed
+neuron in the model file.
+
+\textbf{BANC.} With raw synapse counts (N0), BANC lost every activation prediction: MN9 and
+aBN1 stayed at 0\,Hz for all stimuli, in agreement with \citep{santos2026} and with the weak
+response in \citep{brainlab2026}. Global density scaling (N1, a factor of 2.16) did not
+restore sugar$\to$MN9 (0\,Hz left, 2.6\,Hz right). It restored JO-C/E$\to$aBN1 on the left
+(22.5\,Hz), but in a brain-wide active state of about 13{,}000 neurons, and right sugar and
+right water stimulation also entered such states.
+
+\textbf{Male CNS.} With raw counts the male CNS, which has 1.76 times FlyWire's input per
+cell type, reproduced sugar$\to$MN9 (72.6 and 71.1\,Hz), bitter suppression and
+JO-C/E$\to$aBN1 (98.9 and 62.9\,Hz), but every protocol put more than 9{,}000 neurons into
+activity. Under N1 (a factor of 0.61) activity was sparse for most protocols.
+JO-C/E$\to$aBN1 (84.7 and 56.4\,Hz) and bitter suppression held on both sides;
+sugar$\to$MN9 held on the right (30.5\,Hz) but fell to 5.7\,Hz on the left, below the 20\%
+criterion. Bitter stimulation still recruited about 9{,}000 neurons.
+
+In degree-preserving shuffles of each connectome, MN9 and aBN1 stayed at 0\,Hz in all
+protocols (3 shuffles per connectome; \texttt{results/control\_readouts.csv}).
+\todo{Table 1 typeset from results/replication\_table.csv; N2 and transmitter-rule signs.}
 
 \subsection*{An agreement ladder across three connectomes}
-\todo{Fig. 5 from results/agreement\_ladder.csv and agreement\_summary.csv: seed, hemisphere,
-between (FlyWire--BANC, FlyWire--male CNS, BANC--male CNS), degraded, shuffle; median
-$\rho$ with bootstrap CI per rung, per protocol.}
-\todo{Compare our seed / hemisphere / FlyWire--BANC values with 0.98 / 0.54 / $\le$0.32 in
-\citep{santos2026}.}
-\todo{Key new comparison: is FlyWire--male CNS agreement higher or lower than FlyWire--BANC?
-A male connectome that agrees better with FlyWire than the second female does would argue
-against individuality or sex as the main source of the BANC gap.}
-\todo{Shuffle floor: where does each between-connectome $\rho$ sit relative to the
-degree-preserving shuffle distribution (50 shuffles per connectome)?}
-Hemisphere comparisons in BANC need care, because its typed sensory populations are lopsided
-(water GRNs 3 left vs 15 right; JO-F 37 vs 108; \texttt{results/matching\_coverage.csv}). We
-therefore report the BANC hemisphere rung per protocol, flag the water and JO-F protocols,
-and repeat it with the number of stimulated neurons equalised across sides by random
-subsampling. \todo{numbers}
-Under Shiu's signs, right-side sugar stimulation in FlyWire recruits several thousand neurons,
-the runaway traced by \citep{santos2026} to one mis-signed neuron (il3LN6). The hemisphere
-rung is therefore reported under Shiu's signs (primary) and under transmitter-rule signs.
-\todo{numbers}
+Cell-type response profiles agreed weakly between connectomes
+(Fig.~\ref{fig:ladder}; \texttt{results/agreement\_summary.csv}). Under N1 the median
+Spearman $\rho$ over protocols and sides was 0.21 for FlyWire--BANC, 0.10 for FlyWire--male
+CNS and 0.03 for BANC--male CNS; under N0 the values were 0.20, 0.03 and 0.04. The
+FlyWire--BANC value is close to the $\rho\le0.32$ of \citep{santos2026}. The male CNS did
+not agree with FlyWire better than BANC did. Hemisphere agreement was 0.35 in FlyWire, 0.52
+(N1) to 0.77 (N0) in the male CNS, and 0.07 (N1) to 0.32 (N0) in BANC; \citep{santos2026}
+reported 0.54 and 0.47. Against degree-preserving shuffles, profiles were anticorrelated
+(median $\rho$ $-0.42$ for FlyWire, $-0.42$ for BANC, $-0.12$ for the male CNS, N1), so the
+between-connectome values sit above this floor.
+
+Brain-wide active states dominate these numbers. In 11 of the 36 base experiments under N1
+more than 2\% of neurons were active (\texttt{results/activity\_table.csv}), and a pair of
+profiles disagrees almost completely when only one network is in that state. Restricting to
+pairs in which neither network was in such a state (an exploratory analysis defined after
+seeing the data) gave medians of 0.21 (FlyWire--BANC), 0.18 (FlyWire--male CNS) and 0.48
+(FlyWire hemispheres) under N1.
+\todo{Seed rung (core\_rep) and side-balanced hemisphere rung (core\_bal): runs in progress.
+BANC hemisphere values are affected by its lopsided typing: water 3 vs 15, JO-F 37 vs 108.}
+\todo{Hemisphere rung under transmitter-rule signs.}
 
 \subsection*{Does reconstruction completeness explain the FlyWire--BANC gap?}
-\todo{Headline. From the P1 runs: (i) do degraded-FlyWire copies (thinned to BANC's per-type
-input) lose sugar$\to$MN9 and JO-C/E$\to$aBN1 as BANC does? Fraction of 50 copies meeting
-each replication criterion, under N0 and N1. (ii) Is the observed FlyWire--BANC $\rho$ inside
-the 2.5--97.5\% range of FlyWire vs degraded-FlyWire $\rho$? (iii) The same test with the male
-CNS as reference, where the deficit is reversed and little thinning occurs, as a control.}
-\todo{State the verdict in one sentence: explained / partly explained / not explained by
-completeness.}
+Thinning FlyWire to BANC's per-type input (three copies) reproduced BANC's loss of the
+feeding prediction under raw weights: sugar$\to$MN9 fell from 72.1\,Hz to 0\,Hz in all
+three copies, as in BANC. JO-C/E$\to$aBN1 fell from 34.1 to 14.3\,Hz, where BANC gave
+0\,Hz (\texttt{results/control\_readouts.csv}). So BANC's lower synapse density is by itself
+enough to abolish sugar$\to$MN9 in this model.
+
+Two observations show that density is not the whole explanation. First, global rescaling
+(N1) restored sugar$\to$MN9 in degraded FlyWire (69.1\,Hz; range 63.0--72.4) but not in BANC
+(0\,Hz). Second, degraded FlyWire stayed much closer to FlyWire than BANC was. Under N0 the
+median $\rho$ between FlyWire and its degraded copies was 0.55, and the observed
+FlyWire--BANC $\rho$ fell below the range of the degraded copies in all nine protocol--side
+combinations that could be evaluated (\texttt{results/completeness\_test.csv}); under N1 it
+fell below in seven of nine. With three copies the range is a minimum--maximum, not a 95\%
+interval. Degraded FlyWire under N1 also entered brain-wide activity for JO-C/E stimulation
+(about 10{,}000 active neurons), as BANC did.
+
+The preliminary verdict is therefore \emph{partly explained}: uniform per-type loss of
+synapses accounts for the failure of the headline prediction in BANC as released, but not
+for the failure after density rescaling, nor for most of the profile disagreement.
+\todo{50 copies per condition; the male CNS as reference; verdict with 95\% ranges.}
 
 \subsection*{Robustness and stimulation screen}
 \todo{Fig. 6 from the P2 sweep: verdicts across threshold $\{1,3,5,10\}$ $\times$
-normalisation $\times$ sign scheme $\times$ brain/whole CNS; edge-noise spread.}
-\todo{P3 screen: per sensory type, between-connectome $\rho$ vs shuffle floor; which
-modalities transfer.}
+normalisation $\times$ sign scheme $\times$ brain/whole CNS; edge-noise spread. Not run yet.}
+\todo{P3 screen: per sensory type, between-connectome $\rho$ vs shuffle floor. Not run yet.}
+
+\begin{figure}[p]\centering\includegraphics[width=\textwidth]{figures/fig1_repro}
+\caption{Brian2 reproduction of Shiu et al.\ with their neuron lists (30 trials $\times$ 1\,s;
+error bars 95\% CI). Left: sugar GRNs to MN9 on FlyWire v630 and v783. Middle: bitter GRNs
+suppress the response to sugar at 100\,Hz (v783). Right: JO-C/E but not JO-F drives aBN1.}
+\label{fig:repro}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=\textwidth]{figures/fig2_validation}
+\caption{Per-neuron mean rates, PyTorch float32 against Brian2 float64, FlyWire v783.}
+\label{fig:validation}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=.9\textwidth]{figures/fig3_datasets}
+\caption{Median input synapses per neuron for each shared cell type, against FlyWire.
+Dashed line: median ratio.}\label{fig:datasets}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=\textwidth]{figures/fig4_replication}
+\caption{PRELIMINARY. Readout rates for each prediction, connectome, side and normalisation.}
+\label{tab:rep}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=\textwidth]{figures/fig5_ladder_N1}
+\caption{PRELIMINARY. Agreement ladder under N1. Each point is one protocol and side; open
+symbols mark pairs in which either network had more than 2\% of neurons active.}
+\label{fig:ladder}\end{figure}

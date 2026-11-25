@@ -47,3 +47,25 @@ results are marked PRELIMINARY: they will be replaced by the full grid (`src/swe
 | JO-CE vs JO-F → aBN1 at 100 / 160 / 220 Hz (v783) | 25.8 vs 0.9 / 55.6 vs 1.3 / 73.5 vs 4.8 Hz |
 Not compared numerically with Shiu's published curves (their raw outputs were not downloaded);
 the qualitative results match their Figs 1, 3, 4, 5.
+
+## PRELIMINARY Mac-scale results (30 trials × 1 s; 3 degraded copies, 3 shuffles; to be superseded)
+| Number | Value | Source |
+|---|---|---|
+| FlyWire L, 150 Hz: sugar→MN9 / bitter suppression / JO-CE→aBN1 / JO-F→aBN1 | 72.1 Hz / 85% / 34.1 Hz / 0.1 Hz | results/replication_table.csv, activity_table.csv |
+| FlyWire R sugar: MN9, active neurons | 1.4 Hz, about 8,465 | results/activity_table.csv |
+| BANC N0: all readouts | 0 Hz | results/replication_table.csv |
+| BANC N1: sugar→MN9 L / R; JO-CE→aBN1 L (active) | 0 / 2.6 Hz; 22.5 Hz (13,143) | replication_table.csv, activity_table.csv |
+| N1 scale factors BANC / male CNS | 199/92 = 2.16; 199/326 = 0.61 | results/dataset_summary.csv (median_input_anchor) |
+| Male CNS N0: sugar→MN9 L/R; JO-CE→aBN1 L/R | 72.6 / 71.1; 98.9 / 62.9 Hz | replication_table.csv |
+| Male CNS N1: sugar→MN9 L/R; JO-CE→aBN1 L/R | 5.7 / 30.5; 84.7 / 56.4 Hz | replication_table.csv |
+| Shuffles: MN9, aBN1 | 0 Hz in all (3 per connectome, N1) | results/control_readouts.csv |
+| Ladder medians N1: FW–BANC / FW–mCNS / BANC–mCNS | 0.21 / 0.10 / 0.03 | results/agreement_summary.csv |
+| Ladder medians N0: same pairs | 0.20 / 0.03 / 0.04 | agreement_summary.csv |
+| Hemisphere medians: FlyWire; male CNS N1/N0; BANC N1/N0 | 0.35; 0.52/0.77; 0.07/0.32 | agreement_summary.csv |
+| Shuffle rung medians N1 (FW / BANC / mCNS) | −0.42 / −0.42 / −0.12 | agreement_summary.csv |
+| Experiments with >2% neurons active, N1 own signs | 11 of 36 | results/activity_table.csv |
+| No-runaway medians N1: FW–BANC / FW–mCNS / FW hemispheres | 0.21 / 0.18 / 0.48 | results/agreement_summary_no_runaway.csv |
+| Degraded FlyWire N0: sugar→MN9; JO-CE→aBN1 | 0 Hz (3/3); 14.3 Hz | results/control_readouts.csv |
+| Degraded FlyWire N1: sugar→MN9 | 69.1 Hz (63.0–72.4) | control_readouts.csv |
+| FlyWire vs degraded copies, median ρ, N0 / N1 | 0.55 / 0.49 | agreement_summary.csv |
+| FW–BANC ρ below degraded range: N0 / N1 | 9 of 9 / 7 of 9 protocol-sides | results/completeness_test.csv |
