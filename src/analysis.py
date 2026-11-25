@@ -76,6 +76,9 @@ def replication(norm="N1", sign="own", threshold=1, subgraph="brain"):
             a, b = m(f"sugar+bitter_{s}_150", "MN9"), m(f"sugar_{s}_150", "MN9")
             sup = 1 - np.nanmean(a) / np.nanmean(b) if np.nanmean(b) > 0 else np.nan
             p = stats.mannwhitneyu(a, b, alternative="less").pvalue if np.nanmean(b) > 0 else 1.0
+            base_ok = bool(np.nanmean(b) >= 5)  # D13: suppression needs a sugar response to suppress
+            if not base_ok:
+                sup = np.nan
             tests.append(dict(prediction="bitter suppresses MN9", value=sup,
                               flywire=1 - np.nanmean(m(f"sugar+bitter_{s}_150", "MN9", fw)) /
                               max(np.nanmean(m(f"sugar_{s}_150", "MN9", fw)), 1e-9),
@@ -84,7 +87,7 @@ def replication(norm="N1", sign="own", threshold=1, subgraph="brain"):
             p = stats.mannwhitneyu(ce, f, alternative="greater").pvalue if np.nansum(ce) > 0 else 1.0
             tests.append(dict(prediction="JO-CE > JO-F at aBN1", value=np.nanmean(ce) - np.nanmean(f),
                               flywire=np.nanmean(m(f"JO_CE_{s}_150", "aBN1", fw)) -
-                              np.nanmean(m(f"JO_F_{s}_150", "aBN1", fw)), p=p, crit=True))
+                              np.nanmean(m(f"JO_F_{s}_150", "aBN1", fw)), p=p, crit=bool(np.nanmean(ce) >= 5)))  # D13: needs a JO-CE response
             for t in tests:
                 rows.append(dict(dataset=d, side=s, norm=norm, sign=sign, threshold=threshold,
                                  subgraph=subgraph, **t))
@@ -179,6 +182,47 @@ def activity(norms, signs=("own", "nt")):
     return pd.DataFrame(rows)
 
 
+def control_readouts(norms=("N0", "N1"), n_copies=50):
+    """Readout rates and activity for FlyWire, BANC, degraded-FlyWire copies and shuffles."""
+    rows = []
+    for nm in norms:
+        vs = [("flywire", dict(dataset="flywire", norm=nm)), ("banc", dict(dataset="banc", norm=nm)),
+              ("malecns", dict(dataset="malecns", norm=nm))]
+        for k in range(n_copies):
+            vs.append((f"flywire-degraded-banc", dict(dataset="flywire", norm=nm,
+                       perturb=dict(kind="degrade", seed=k, ref="banc"))))
+            for d in C.DATASETS:
+                vs.append((f"{d}-shuffle", dict(dataset=d, norm=nm, perturb=dict(kind="shuffle", seed=k))))
+        for label, v in vs:
+            res = get(v)
+            if res is None:
+                continue
+            n = len(neurons_for(v))
+            for exp, r in res.items():
+                rows.append(dict(network=label, norm=nm, seed=(v.get("perturb") or {}).get("seed", -1),
+                                 exp=exp, MN9=float(np.nanmean(r["ro"][:, :2])),
+                                 aBN1=float(np.nanmean(r["ro"][:, 2:])), n_active=r["n_active"],
+                                 runaway=bool(r["n_active"] / n > 0.02)))
+    return pd.DataFrame(rows)
+
+
+def completeness_test(lad):
+    """H3 per protocol and side: is the observed FlyWire-BANC rho inside the range of
+    FlyWire vs degraded-FlyWire(->BANC) copies? (2.5-97.5% range; with few copies = min-max.)"""
+    rows = []
+    for (nm, pr, sd), d in lad[lad.rung.isin(["between", "degraded->banc"])].groupby(["norm", "protocol", "side"]):
+        obs = d[(d.rung == "between") & (d.pair == "flywire|banc")].rho
+        deg = d[d.rung == "degraded->banc"].rho.dropna()
+        if len(obs) and len(deg):
+            lo, hi = np.percentile(deg, [2.5, 97.5])
+            rows.append(dict(norm=nm, protocol=pr, side=sd, rho_flywire_banc=float(obs.iloc[0]),
+                             deg_median=float(deg.median()), deg_lo=float(lo), deg_hi=float(hi),
+                             n_copies=len(deg),
+                             inside=bool(lo <= obs.iloc[0] <= hi) if np.isfinite(obs.iloc[0]) else None,
+                             below=bool(obs.iloc[0] < lo) if np.isfinite(obs.iloc[0]) else None))
+    return pd.DataFrame(rows)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--norms", default="N0,N1,N2")
@@ -191,9 +235,12 @@ def main():
         lads.append(ladder(norm=nm, n_boot=a.n_boot))
     rep = pd.concat(reps)
     lad = pd.concat(lads)
+    control_readouts().to_csv(out / "control_readouts.csv", index=False)
     act = activity(a.norms.split(","))
     act.to_csv(out / "activity_table.csv", index=False)
     rep.to_csv(out / "replication_table.csv", index=False)
+    if len(lad):
+        completeness_test(lad).to_csv(out / "completeness_test.csv", index=False)
     lad.to_csv(out / "agreement_ladder.csv", index=False)
     if len(lad):
         lad = lad.assign(pairbase=lad.pair.str.replace(r"#\d+", "", regex=True))

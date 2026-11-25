@@ -126,3 +126,15 @@ others excitatory"); this is kept and listed as a limitation.
 Once the Brian2 reproduction finishes, a CPU job runs degrade/shuffle seeds 2 and 1 while the
 MPS queue runs seeds 0 upward (two heavy processes in total). Seeds are per item, so results
 do not depend on the device.
+
+## D13. Correction to two replication criteria (2026-11-25, after seeing the first tables)
+The pre-specified criteria let two predictions "replicate" vacuously: bitter suppression when
+sugar alone gave under 5 Hz at MN9 (nothing to suppress), and JO-CE > JO-F when JO-CE gave
+under 5 Hz at aBN1. Both now require the underlying activation (≥ 5 Hz). This changes
+verdicts from "replicates" to "not evaluable / no" for FlyWire right-side sugar and for BANC.
+The change was made after seeing data and is disclosed in Methods.
+
+## D14. Extra CPU null seeds not started
+An attempt to start a further CPU worker (null seeds 5-9) at 10:00 was blocked by the session's
+permission system; it was not retried. Preliminary nulls therefore rest on seeds 0-2 (and 3-4
+if the MPS queue reaches them).
