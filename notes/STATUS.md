@@ -1,4 +1,29 @@
-# STATUS (checkpoint 2026-11-25 01:15)
+# STATUS (2026-11-28 23:40)
+
+## Where this project is (plain language)
+**About 60% done.** The method works and is validated, all data are in, and a first full set
+of results exists at laptop scale. The large robustness runs are what remain.
+
+- **Finished:** novelty check; environment and licence; all three connectomes downloaded,
+  checked and converted to one format; Shiu's published results reproduced with his own
+  code; our fast simulator validated against it; cell-type matching; the main experiments on
+  all three connectomes under three weight normalisations and two sign rules; a first small
+  set of controls (5 thinned-FlyWire copies, 5 shuffles per connectome); figures 1-5; a
+  paper draft with Introduction, Methods, Results, Discussion and Abstract (preliminary
+  numbers); the cloud runbook, tested on this Mac.
+- **Running now (started 28 Nov, 23:30):** the full sweep on this Mac, in two background
+  jobs (GPU and CPU). At the laptop's speed the first phase (the 50-copy controls behind the
+  headline result) needs roughly one to two weeks, and the whole grid about a month. Both
+  jobs can be stopped and restarted without losing finished work.
+- **Next:** rerun the analysis as results accumulate; replace preliminary numbers in the
+  paper; robustness figure and stimulation screen; compile the LaTeX; final citation check.
+- **Needs the user:**
+  1. Decide whether to rent the RTX 4090. It would finish the whole grid in an estimated
+     15-46 hours (about $5-32) instead of about a month here. Everything is ready:
+     `docs/cloud_runbook.md`. Results already computed on the Mac can be copied to the box
+     so they are not recomputed.
+  2. Authors and the AI-use statement (placeholders in the draft).
+  3. Install LaTeX on this Mac (for example MacTeX) or say where the draft should be compiled.
 
 ## Done
 - Novelty: heavy partial overlap with cerebro-mosca (FlyWire vs BANC). Precise comparison and
@@ -34,21 +59,16 @@ Benchmark (FlyWire core battery, 50 ms runs, under load):
 So MPS works best with small batches (`--max_rows 60`). One core battery
 (12 exps × 30 trials × 1 s) takes about 21 min per variant on MPS under load.
 
-## Running now (2026-11-25 10:30)
-- `nohup bash scripts/mac_queue.sh > results/mac_queue.log 2>&1 &` (MPS; resumable). Done:
-  main N1 and N0 core (all three), degrade→BANC seeds 0-2 (N0, N1), shuffles seeds 0-2 (N1).
-  Now: core_rep N1 (seed rung), then core_bal (D10), nt signs, N2, seeds 3-4, core_rep N0.
-- CPU worker finished (seeds 1, 2). Brian2 reproduction finished (T2.1 done).
+## Running now
+- `nohup caffeinate -i nice .venv/bin/python src/sweep.py --device mps --phase P1,P2,P3 --max_rows 60 > results/mac_sweep_mps.log 2>&1 &`
+- `nohup caffeinate -i nice .venv/bin/python src/sweep.py --device cpu --phase P1 --max_rows 60 --reverse > results/mac_sweep_cpu.log 2>&1 &`
+  (second worker, walks P1 backwards). Both skip finished items; restart with the same
+  commands. Progress: results/ledger.csv and the two logs (they print the rate and ETA).
+- The earlier Mac queue (scripts/mac_queue.sh) finished on 26 Nov: 46 items.
 
-## Preliminary analysis DONE (commits 5172f74, 119b082)
-`.venv/bin/python src/analysis.py --norms N1,N0` writes replication_table.csv,
-agreement_ladder.csv, agreement_summary*.csv, completeness_test.csv, control_readouts.csv,
-activity_table.csv. Figures: `src/figures.py fig_repro fig_replication fig_ladder`.
-Paper: results, discussion, abstract filled with preliminary numbers (paper/notes.md lists
-each with its source). Remaining todo items are the full-grid parts and the seed /
-balanced-hemisphere / nt-sign rungs (rerun analysis when the queue finishes them).
-Headline so far: degraded FlyWire loses sugar→MN9 like BANC (N0), but N1 rescues degraded
-FlyWire and not BANC, and FlyWire-BANC rho is below the degraded range: "partly explained".
+## Analysis
+`.venv/bin/python src/analysis.py --norms N1,N0,N2` (also runs N1 with transmitter-rule
+signs) writes results/*.csv; figures via `src/figures.py fig_repro fig_replication fig_ladder`.
 
 ## Researcher's choices (25 Nov)
 Framing (a); rent a 4090 later (no SSH yet; do not wait); Shiu's signs primary. Commit

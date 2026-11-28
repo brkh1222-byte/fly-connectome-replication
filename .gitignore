@@ -17,3 +17,5 @@ venv/
 results/validation/*.npy
 results/runs/
 *.part
+results/*.log
+results/analysis_prelim.txt

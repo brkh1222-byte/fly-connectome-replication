@@ -210,12 +210,12 @@ def completeness_test(lad):
     """H3 per protocol and side: is the observed FlyWire-BANC rho inside the range of
     FlyWire vs degraded-FlyWire(->BANC) copies? (2.5-97.5% range; with few copies = min-max.)"""
     rows = []
-    for (nm, pr, sd), d in lad[lad.rung.isin(["between", "degraded->banc"])].groupby(["norm", "protocol", "side"]):
+    for (nm, sg, pr, sd), d in lad[lad.rung.isin(["between", "degraded->banc"])].groupby(["norm", "sign", "protocol", "side"]):
         obs = d[(d.rung == "between") & (d.pair == "flywire|banc")].rho
         deg = d[d.rung == "degraded->banc"].rho.dropna()
         if len(obs) and len(deg):
             lo, hi = np.percentile(deg, [2.5, 97.5])
-            rows.append(dict(norm=nm, protocol=pr, side=sd, rho_flywire_banc=float(obs.iloc[0]),
+            rows.append(dict(norm=nm, sign=sg, protocol=pr, side=sd, rho_flywire_banc=float(obs.iloc[0]),
                              deg_median=float(deg.median()), deg_lo=float(lo), deg_hi=float(hi),
                              n_copies=len(deg),
                              inside=bool(lo <= obs.iloc[0] <= hi) if np.isfinite(obs.iloc[0]) else None,
@@ -233,6 +233,9 @@ def main():
     for nm in a.norms.split(","):
         reps.append(replication(norm=nm))
         lads.append(ladder(norm=nm, n_boot=a.n_boot))
+    if get(dict(dataset="flywire", subgraph="brain", threshold=1, norm="N1", sign="nt")) is not None:
+        reps.append(replication(norm="N1", sign="nt"))   # transmitter-rule signs (D9)
+        lads.append(ladder(norm="N1", sign="nt", n_boot=a.n_boot))
     rep = pd.concat(reps)
     lad = pd.concat(lads)
     control_readouts().to_csv(out / "control_readouts.csv", index=False)
@@ -244,12 +247,12 @@ def main():
     lad.to_csv(out / "agreement_ladder.csv", index=False)
     if len(lad):
         lad = lad.assign(pairbase=lad.pair.str.replace(r"#\d+", "", regex=True))
-        summ = lad.groupby(["norm", "rung", "pairbase"]).agg(
+        summ = lad.groupby(["norm", "sign", "rung", "pairbase"]).agg(
             rho_median=("rho", "median"), rho_mean=("rho", "mean"),
             rho_q05=("rho", lambda x: x.quantile(0.05)), rho_q95=("rho", lambda x: x.quantile(0.95)),
             jaccard_median=("jaccard", "median"), n=("rho", "count")).reset_index()
         summ.to_csv(out / "agreement_summary.csv", index=False)
-        calm = lad[~lad.any_runaway].groupby(["norm", "rung", "pairbase"]).agg(
+        calm = lad[~lad.any_runaway].groupby(["norm", "sign", "rung", "pairbase"]).agg(
             rho_median=("rho", "median"), rho_mean=("rho", "mean"),
             jaccard_median=("jaccard", "median"), n=("rho", "count")).reset_index()
         calm.to_csv(out / "agreement_summary_no_runaway.csv", index=False)  # exploratory (D11)

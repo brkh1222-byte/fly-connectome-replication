@@ -71,6 +71,8 @@ def main():
     ap.add_argument("--phase", default="P1,P2,P3")
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--tiny", action="store_true")
+    ap.add_argument("--reverse", action="store_true",
+                    help="walk each phase's item list backwards (second worker on the same grid)")
     ap.add_argument("--max_rows", type=int, default=0, help="0 = auto from free GPU memory")
     a = ap.parse_args()
     phases = a.phase.split(",")
@@ -83,6 +85,8 @@ def main():
             continue
         if a.tiny:
             its = its[:1] + its[-1:]
+        if a.reverse:
+            its = its[::-1]
         t0 = time.time()
         n_exp = {"core": 12, "core_rep": 12, "core_bal": 10, "screen": 2 * len(X.screen_types())}
         total_ts = sum(n_exp[b] * 30 for _, b in its)
